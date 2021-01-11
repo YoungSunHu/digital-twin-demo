@@ -2,7 +2,7 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3377/xa_building?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+    url: jdbc:mysql://127.0.0.1:3306/digitail-twin-demo?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
     username: admin
     password: youngsun2020
     druid:
@@ -32,6 +32,6 @@ mybatis-plus:
   config-location:
 
 logging:
-  file: ../xa-ibuilding/logs/xa-ibuilding.log
+  file: ../digitail-twin-demo/logs/digitail-twin-demo.log
   level:
-    com.hqy.*: info
+    com.gs.*: info
