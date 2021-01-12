@@ -42,7 +42,7 @@ public class TwinPointController {
         TwinPointEntity twinPointEntity = new TwinPointEntity();
         BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
         twinPointService.save(twinPointEntity);
-        return CommomResponse.success("保存成功");
+        return CommomResponse.success("保 存成功");
     }
 
     @PostMapping("/calculateScriptTest")
