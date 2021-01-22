@@ -4,6 +4,7 @@ import com.gs.DTO.CalculateScriptTestDTO;
 import com.gs.DTO.SaveTwinPointDTO;
 import com.gs.VO.CommomResponse;
 import com.gs.dao.entity.TwinPointEntity;
+import com.gs.service.OPCItemValueRecordService;
 import com.gs.service.TwinPointService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +22,16 @@ public class TwinPointController {
     @Autowired
     TwinPointService twinPointService;
 
+    @Autowired
+    OPCItemValueRecordService opcItemValueRecordService;
+
     /**
      * dcs点位列表
      *
      * @return
      */
-    @GetMapping("/DCSPointList")
-    public CommomResponse getDCSPointList() {
+    @GetMapping("/itemList")
+    public CommomResponse itemList() {
         return null;
     }
 
@@ -42,9 +46,15 @@ public class TwinPointController {
         TwinPointEntity twinPointEntity = new TwinPointEntity();
         BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
         twinPointService.save(twinPointEntity);
-        return CommomResponse.success("保 存成功");
+        return CommomResponse.success("保存成功");
     }
 
+    /**
+     * 计算脚本测试
+     *
+     * @param calculateScriptTestDTO
+     * @return
+     */
     @PostMapping("/calculateScriptTest")
     public CommomResponse calculateScriptTest(@RequestBody CalculateScriptTestDTO calculateScriptTestDTO) {
         return null;

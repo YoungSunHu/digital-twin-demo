@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://dev-digi-twin.cz1aydafnfhc.rds.cn-northwest-1.amazonaws.com.cn:15432/dev_digi_twin
+    username: gsdt
+    password: TlF2a3t86P
+    druid:
+      filters: stat,wall,log4j2
+      max-active: 20
+      initial-size: 1
+      max-wait: 60000
+      min-idle: 1
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: select 'x'
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-open-prepared-statements: 50
+      max-pool-prepared-statement-per-connection-size: 2
+      filter:
+        log4j2:
+          statement-executable-sql-log-enable: true
+  redis:
+    host: 52.83.241.9
+    password: gs12345
+    port: 16379
+    database: 1
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml,classpath*:com/gs/mapper/xml/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    map-underscore-to-camel-case: true
+  config-location:
+
+logging:
+  file: ../digitail-twin-demo/logs/digitail-twin-demo.log
+  level:
+    com.gs.*: info
+server:
+  port: 8765

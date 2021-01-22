@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
  */
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "twin_point")
+@TableName(value = "public.twin_point")
 public class TwinPointEntity implements Serializable {
 
     @TableId("id")
@@ -63,7 +63,7 @@ public class TwinPointEntity implements Serializable {
     private Float thresholdMin;
 
     @TableField("data_type")
-    private Float dataType;
+    private Integer dataType;
 
     @TableField("calculate_script")
     private String calculateScript;

@@ -5,33 +5,27 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author ：YoungSun
- * @date ：Created in 2021/1/11 17:33
+ * @date ：Created in 2021/1/22 14:26
  * @modified By：
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Validated
-public class CalculateScriptTestDTO implements Serializable {
-    /**
-     * 运算脚本
-     */
-    @NotBlank(message = "calculateScript不得为空")
-    private String calculateScript;
+public class ItemStatusDTO implements Serializable {
 
-    @NotBlank
+    /**
+     * 工厂ID 必填
+     */
     private String factoryId;
 
     /**
-     * 参数点位id
+     * 工厂点位ID
      */
     private List<String> itemIds;
-
-
 }
