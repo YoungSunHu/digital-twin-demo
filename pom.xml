@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.1.1</version>
+            <version>3.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
-            <version>1.1.17</version>
+            <version>1.1.21</version>
         </dependency>
         <dependency>
             <groupId>dom4j</groupId>
@@ -98,11 +98,6 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.hik.artemis</groupId>
-            <artifactId>artemis-http-client</artifactId>
-            <version>1.1.2</version>
         </dependency>
         <dependency>
             <groupId>io.github.wilson-he</groupId>

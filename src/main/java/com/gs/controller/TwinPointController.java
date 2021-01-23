@@ -1,10 +1,7 @@
 package com.gs.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.gs.DTO.CalculateScriptTestDTO;
-import com.gs.DTO.ItemListDTO;
-import com.gs.DTO.SaveTwinPointDTO;
-import com.gs.DTO.TwinPointListDTO;
+import com.gs.DTO.*;
 import com.gs.VO.CommomResponse;
 import com.gs.dao.entity.OPCItemEntity;
 import com.gs.dao.entity.TwinPointEntity;
@@ -16,6 +13,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -60,6 +59,8 @@ public class TwinPointController {
     public CommomResponse saveTwinPoint(@RequestBody SaveTwinPointDTO saveTwinPointDTO) {
         TwinPointEntity twinPointEntity = new TwinPointEntity();
         BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
+        //下次更新时间
+        twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
         twinPointService.save(twinPointEntity);
         return CommomResponse.success("保存成功");
     }
@@ -88,9 +89,13 @@ public class TwinPointController {
      */
     @PostMapping("/calculateScriptTest")
     public CommomResponse calculateScriptTest(@RequestBody CalculateScriptTestDTO calculateScriptTestDTO) {
-        Double aDouble = calculateScriptService.calculateScriptTest(calculateScriptTestDTO);
+        Double aDouble = calculateScriptService.calculateScriptRun(calculateScriptTestDTO);
         return CommomResponse.data("success", aDouble);
     }
 
+    @PostMapping("/itemStatus")
+    public CommomResponse itemStatus(@RequestBody ItemStatusDTO itemStatusDTO) {
+        return CommomResponse.data("success", opcItemValueRecordService.itemStatus(itemStatusDTO));
+    }
 
 }

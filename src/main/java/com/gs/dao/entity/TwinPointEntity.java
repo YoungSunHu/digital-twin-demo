@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
  * @modified By：
  * 孪生点位实体
  */
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "public.twin_point")
@@ -67,6 +69,12 @@ public class TwinPointEntity implements Serializable {
 
     @TableField("calculate_script")
     private String calculateScript;
+
+    @TableField("point_value")
+    private String pointValue;
+
+    @TableField("next_update_time")
+    private LocalDateTime nextUpdateTime;
 
     @TableField("create_time")
     private LocalDateTime createTime;

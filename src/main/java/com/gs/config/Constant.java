@@ -6,5 +6,8 @@ package com.gs.config;
  * @modified By：
  */
 public class Constant {
+
     public static final String REDIS_ITEM_CACHE_PREFIX = "GS:ITEM_CACHE:";
+
+    public static final String REDIS_TWIN_POINT_CACHE_PREFIX = "GS:TWIN_POINT_CACHE:";
 }

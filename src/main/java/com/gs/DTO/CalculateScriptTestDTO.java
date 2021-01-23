@@ -25,13 +25,7 @@ public class CalculateScriptTestDTO implements Serializable {
     @NotBlank(message = "calculateScript不得为空")
     private String calculateScript;
 
-    @NotBlank
+    @NotBlank(message = "factoryId不得为空")
     private String factoryId;
-
-    /**
-     * 参数点位id
-     */
-    private List<String> itemIds;
-
 
 }

@@ -20,8 +20,8 @@ public class PatterTest {
 
     @Test
     public void rexTest() {
-        Pattern p = Pattern.compile("\\$\\{\\s*(\\w+)\\s*(([\\+\\-])\\s*(\\d+)\\s*)?\\}");
-        Matcher m = p.matcher("${1},${2},${3},${4},${5}");
+        Pattern p = Pattern.compile("\\$\\{(.*?)\\}");
+        Matcher m = p.matcher("result=${_PublicGroup.fhf6.Balance_02_nFlux}+${_PublicGroup.fhf6.Balance_03_nFlux}");
         while (m.find()) {
             String group = m.group();
             System.out.println(m.group().replace("${", "").replace("}", ""));

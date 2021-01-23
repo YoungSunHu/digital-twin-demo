@@ -30,8 +30,6 @@ public class DataController {
     @Autowired
     OPCItemValueRecordService opcItemValueRecordService;
 
-    @Autowired
-
     Snowflake snowflake = IdUtil.createSnowflake(1, 1);
 
     @PostMapping("/itemUpload")
@@ -43,10 +41,5 @@ public class DataController {
         return CommomResponse.success("success");
     }
 
-
-    @PostMapping("/itemStatus")
-    public CommomResponse itemStatus(@RequestBody ItemStatusDTO itemStatusDTO) {
-        return CommomResponse.data("success", opcItemValueRecordService.itemStatus(itemStatusDTO));
-    }
 
 }
