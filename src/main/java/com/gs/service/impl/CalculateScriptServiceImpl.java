@@ -1,9 +1,7 @@
 package com.gs.service.impl;
 
-import cn.hutool.json.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gs.DTO.CalculateScriptTestDTO;
@@ -12,8 +10,6 @@ import com.gs.dao.entity.OPCItemValueRecordEntity;
 import com.gs.service.CalculateScriptService;
 import com.gs.service.OPCItemValueRecordService;
 import org.apache.commons.lang3.StringUtils;
-import org.python.core.PyFloat;
-import org.python.core.PyFunction;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +17,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.management.Query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
