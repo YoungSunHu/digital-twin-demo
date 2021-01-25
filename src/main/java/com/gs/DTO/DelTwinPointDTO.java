@@ -6,23 +6,21 @@ import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
-import java.util.List;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author ：YoungSun
- * @date ：Created in 2021/1/23 11:53
+ * @date ：Created in 2021/1/24 9:04
  * @modified By：
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Validated
-public class TwinPointListDTO {
-
+public class DelTwinPointDTO {
+    @NotBlank(message = "pointId不得为空")
+    private String pointId;
+    private Long id;
     @NotBlank(message = "factoryId不得为空")
     private String factoryId;
-
-    private String productionLineId;
-
-    private List<String> twinPointIds;
 }

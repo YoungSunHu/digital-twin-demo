@@ -10,19 +10,16 @@ import java.util.List;
 
 /**
  * @author ：YoungSun
- * @date ：Created in 2021/1/23 11:53
+ * @date ：Created in 2021/1/24 10:53
  * @modified By：
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Validated
-public class TwinPointListDTO {
-
+public class TwinPointStatusDTO {
     @NotBlank(message = "factoryId不得为空")
     private String factoryId;
-
     private String productionLineId;
-
-    private List<String> twinPointIds;
+    private List<Long> twinPointId;
 }

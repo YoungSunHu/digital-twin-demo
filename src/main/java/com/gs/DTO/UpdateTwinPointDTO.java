@@ -7,18 +7,17 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 
 /**
  * @author ：YoungSun
- * @date ：Created in 2021/1/11 14:58
+ * @date ：Created in 2021/1/24 9:21
  * @modified By：
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Validated
-public class SaveTwinPointDTO implements Serializable {
+public class UpdateTwinPointDTO {
 
     private Long id;
 
@@ -29,10 +28,10 @@ public class SaveTwinPointDTO implements Serializable {
 
     private String pointName;
 
-    @NotBlank(message = "pointId不得为空")
+    @NotBlank(message = "factoryId不得为空")
     private String factoryId;
 
-    @NotBlank(message = "pointId不得为空")
+    @NotBlank(message = "productionLineId不得为空")
     private String productionLineId;
 
     private String unit;
@@ -52,18 +51,10 @@ public class SaveTwinPointDTO implements Serializable {
     private Float thresholdMin;
 
     @NotNull(message = "dataType不得为空")
-    private Integer dataType;
+    private Float dataType;
 
     /**
      * 孪生点位计算脚本
      */
     private String calculateScript;
-
-    /**
-     * 孪生点位值 为固定值时必填
-     */
-    private String pointValue;
-
-    private String itemId;
-
 }

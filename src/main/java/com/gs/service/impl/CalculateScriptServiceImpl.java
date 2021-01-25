@@ -17,8 +17,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.sound.midi.Soundbank;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +39,8 @@ public class CalculateScriptServiceImpl implements CalculateScriptService {
 
     @Autowired
     OPCItemValueRecordService opcItemValueRecordService;
+
+    private static PythonInterpreter pyInterpreter = null;
 
     @Override
     public Double calculateScriptRun(CalculateScriptTestDTO calculateScriptTestDTO) {
@@ -59,13 +63,13 @@ public class CalculateScriptServiceImpl implements CalculateScriptService {
             script = script.replace("${" + param + "}", itemValue);
         }
         //脚本测试
-        PythonInterpreter interpreter = new PythonInterpreter();
+        PythonInterpreter pythonInterpreter = getPythonInterpreter();
         try {
-            interpreter.exec(script);
+            pythonInterpreter.exec(script);
         } catch (Exception e) {
-            throw new RuntimeException("脚本错误,请检查脚本");
+            throw new RuntimeException("脚本错误,请检查脚本:" + e.getMessage());
         }
-        PyObject result = interpreter.get("result", PyObject.class);
+        PyObject result = pythonInterpreter.get("result", PyObject.class);
         return result.asDouble();
     }
 
@@ -82,5 +86,24 @@ public class CalculateScriptServiceImpl implements CalculateScriptService {
             params.add(matcher.group().replace("${", "").replace("}", ""));
         }
         return params;
+    }
+
+    private static PythonInterpreter getPythonInterpreter() {
+        if (pyInterpreter == null) {
+            Properties props = new Properties();
+            props.put("python.home", "../jython-2.7.0");
+            props.put("python.console.encoding", "UTF-8");
+            props.put("python.security.respectJavaAccessibility", "false");
+            props.put("python.import.site", "false");
+            Properties preprops = System.getProperties();
+            PythonInterpreter.initialize(preprops, props, new String[0]);
+            pyInterpreter = new PythonInterpreter();
+            pyInterpreter.exec("import sys");
+            pyInterpreter.exec("print 'prefix', sys.prefix");
+            pyInterpreter.exec("print sys.path");
+            System.out.println("python的jar包引用正确");
+            pyInterpreter = new PythonInterpreter();
+        }
+        return pyInterpreter;
     }
 }

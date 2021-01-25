@@ -18,6 +18,8 @@ public interface TwinPointService extends IService<TwinPointEntity> {
     List<TwinPointEntity> twinPointForUpdateValue();
 
     /**
+     * 点位数值更新
+     *
      * @param pointId
      */
     void pointValueUpdate(Long pointId);

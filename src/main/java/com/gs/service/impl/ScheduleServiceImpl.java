@@ -1,6 +1,10 @@
 package com.gs.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.gs.dao.entity.OPCItemEntity;
 import com.gs.dao.entity.TwinPointEntity;
+import com.gs.service.OPCItemService;
+import com.gs.service.OPCItemValueRecordService;
 import com.gs.service.ScheduleService;
 import com.gs.service.TwinPointService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Autowired
     TwinPointService twinPointService;
 
+    @Autowired
+    OPCItemValueRecordService opcItemValueRecordService;
+
+    @Autowired
+    OPCItemService opcItemService;
+
     @Override
     @Scheduled(cron = "*/10 * * * * ?")
     public void twinPointUpdate() {
@@ -24,6 +34,18 @@ public class ScheduleServiceImpl implements ScheduleService {
         twinPointEntities.forEach(
                 i -> {
                     twinPointService.pointValueUpdate(i.getId());
+                }
+        );
+    }
+
+    @Override
+    @Scheduled(cron = "0 0/30 * * * ?")
+    public void itemAverage() {
+        //需要统计均值的item
+        List<OPCItemEntity> entities = opcItemService.list(new QueryWrapper<OPCItemEntity>().in("item_type", 2, 3, 4));
+        entities.forEach(
+                i -> {
+                    opcItemValueRecordService.itemAverage(i.getId());
                 }
         );
     }

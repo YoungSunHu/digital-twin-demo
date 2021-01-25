@@ -2,12 +2,15 @@ package com.gs.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gs.DTO.ItemStatusDTO;
 import com.gs.config.Constant;
+import com.gs.dao.entity.OPCItemEntity;
 import com.gs.dao.entity.OPCItemValueRecordEntity;
 import com.gs.dao.mapper.OPCItemValueRecordMapper;
+import com.gs.service.OPCItemService;
 import com.gs.service.OPCItemValueRecordService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +35,12 @@ public class OPCItemValueRecordServiceImpl extends ServiceImpl<OPCItemValueRecor
 
     @Autowired
     StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    OPCItemValueRecordMapper opcItemValueRecordMapper;
+
+    @Autowired
+    OPCItemService opcItemService;
 
     @Override
     @Async
@@ -55,10 +66,24 @@ public class OPCItemValueRecordServiceImpl extends ServiceImpl<OPCItemValueRecor
                 keys.add(Constant.REDIS_ITEM_CACHE_PREFIX + itemStatusDTO.getFactoryId() + ":" + itemId);
             }
             List<String> strings = stringRedisTemplate.opsForValue().multiGet(keys);
+            if (CollectionUtils.isEmpty(strings) || strings.get(0) == null) {
+                return opcItemValueRecordEntities;
+            }
             for (String string : strings) {
                 opcItemValueRecordEntities.add(JSON.parseObject(string, OPCItemValueRecordEntity.class));
             }
         }
         return opcItemValueRecordEntities;
+    }
+
+    @Async
+    @Override
+    public void itemAverage(Long itemId) {
+        OPCItemEntity opcItemEntity = opcItemService.getOne(new QueryWrapper<OPCItemEntity>().eq("id", itemId));
+        if (opcItemEntity == null) {
+            return;
+        }
+        Double avg = opcItemValueRecordMapper.itemAverage(opcItemEntity.getFactoryId(), opcItemEntity.getItemId(), LocalDateTime.now().minus(3600, ChronoUnit.SECONDS), LocalDateTime.now());
+        stringRedisTemplate.opsForValue().set(Constant.REDIS_ITEM_AVG_CACHE_PREFIX + opcItemEntity.getFactoryId() + ":" + opcItemEntity.getItemId(), String.valueOf(avg));
     }
 }

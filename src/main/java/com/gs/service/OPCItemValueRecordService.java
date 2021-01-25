@@ -11,4 +11,11 @@ public interface OPCItemValueRecordService extends IService<OPCItemValueRecordEn
     void itemCache(OPCItemValueRecordEntity opcItemValueRecordEntity);
 
     List<OPCItemValueRecordEntity> itemStatus(ItemStatusDTO itemStatusDTO);
+
+    /**
+     * 原始点位均值统计
+     *
+     * @param itemId
+     */
+    void itemAverage(Long itemId);
 }

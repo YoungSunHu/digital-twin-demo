@@ -7,7 +7,12 @@ package com.gs.config;
  */
 public class Constant {
 
+    //item缓存前缀
     public static final String REDIS_ITEM_CACHE_PREFIX = "GS:ITEM_CACHE:";
 
+    //孪生点位缓存前缀
     public static final String REDIS_TWIN_POINT_CACHE_PREFIX = "GS:TWIN_POINT_CACHE:";
+
+    //item均值前缀
+    public static final String REDIS_ITEM_AVG_CACHE_PREFIX = "GS:ITEM_AVG_CACHE:";
 }

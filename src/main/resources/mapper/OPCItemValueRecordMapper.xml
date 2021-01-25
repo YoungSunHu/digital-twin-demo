@@ -3,4 +3,15 @@
 
 <mapper namespace="com.gs.dao.mapper.OPCItemValueRecordMapper">
 
+    <select id="itemAverage" resultType="java.lang.Double">
+        SELECT AVG( item_value :: NUMERIC )
+        FROM
+            opc_item_value_record
+        WHERE
+            factory_id =#{factoryId}
+            AND item_id = #{itemId}
+            AND item_type in (2,3,4)
+            AND item_timestamp BETWEEN #{startDate}
+            AND  #{endDate}
+    </select>
 </mapper>

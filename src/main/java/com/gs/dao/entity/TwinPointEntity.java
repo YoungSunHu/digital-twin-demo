@@ -73,6 +73,9 @@ public class TwinPointEntity implements Serializable {
     @TableField("point_value")
     private String pointValue;
 
+    @TableField("item_id")
+    private String itemId;
+
     @TableField("next_update_time")
     private LocalDateTime nextUpdateTime;
 
