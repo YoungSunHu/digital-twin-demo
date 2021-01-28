@@ -10,6 +10,11 @@ public interface ScheduleService {
     void twinPointUpdate();
 
     /**
+     * 孪生点位均值统计
+     */
+    void twinPointAverage();
+
+    /**
      * 原始点位均值统计
      */
     void itemAverage();

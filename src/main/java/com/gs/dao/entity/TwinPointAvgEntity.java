@@ -14,25 +14,20 @@ import java.time.LocalDateTime;
  * @author ：YoungSun
  * @date ：Created in 2021/1/11 13:50
  * @modified By：
+ * 孪生点位实体
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "public.twin_point_value_record")
-public class TwinPointValueRecordEntity implements Serializable {
+@TableName(value = "public.twin_point_avg")
+public class TwinPointAvgEntity implements Serializable {
 
     @TableId("id")
     private Long id;
 
-    /**
-     * 孪生点位主键id
-     */
     @TableField("point_id")
-    private String pointId;
+    private Long pointId;
 
-    /**
-     * 孪生点位id
-     */
     @TableField("twin_point_id")
     private String twinPointId;
 
@@ -54,10 +49,9 @@ public class TwinPointValueRecordEntity implements Serializable {
     @TableField("data_type")
     private Integer dataType;
 
-    @TableField("twin_point_value")
-    private String twinPointValue;
+    @TableField("twin_point_avg_value")
+    private String twinPointAvgValue;
 
     @TableField("create_time")
     private LocalDateTime createTime;
-
 }

@@ -98,7 +98,9 @@ public class TwinPointController {
             twinPointEntity.setPointValue(CollectionUtils.isEmpty(records) ? null : records.get(0).getItemValue());
         }
         //下次更新时间
-        twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
+        twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateFrequency(), ChronoUnit.SECONDS));
+        //均值更新时间
+        twinPointEntity.setAvgUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
         twinPointEntity.setId(snowflake.nextId());
         BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
         twinPointService.save(twinPointEntity);

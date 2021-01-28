@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -26,6 +28,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Autowired
     TwinPointValueRecordService twinPointValueRecordService;
+
+    @Autowired
+    TwinPointAvgService twinPointAvgService;
 
     Snowflake snowflake = new Snowflake(4, 4);
 
@@ -52,6 +57,19 @@ public class ScheduleServiceImpl implements ScheduleService {
                     twinPointValueRecordService.save(twinPointValueRecordEntity);
                 }
         );
+    }
+
+    @Override
+    @Scheduled(cron = "*/10 * * * * ?")
+    public void twinPointAverage() {
+        //需要更新均值的孪生点位
+        List<TwinPointEntity> list = twinPointService.list(new QueryWrapper<TwinPointEntity>().in("data_type", 1, 2).gt("avg_update_time", LocalDateTime.now()));
+        //统计均值
+        for (TwinPointEntity pointEntity : list) {
+            twinPointAvgService.twinPointAvg(pointEntity.getId());
+            pointEntity.setAvgUpdateTime(pointEntity.getAvgUpdateTime().plus(pointEntity.getCalculateCycle(), ChronoUnit.SECONDS));
+            twinPointService.updateById(pointEntity);
+        }
     }
 
     @Override

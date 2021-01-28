@@ -68,7 +68,7 @@ public class TwinPointServiceImpl extends ServiceImpl<TwinPointMapper, TwinPoint
             aDouble = b.setScale(pointEntity.getDecimalPalces(), BigDecimal.ROUND_HALF_UP).doubleValue();
             pointEntity.setPointValue(String.valueOf(aDouble));
             //更新下次更新时间
-            pointEntity.setNextUpdateTime(LocalDateTime.now().plus(pointEntity.getCalculateCycle(), ChronoUnit.SECONDS));
+            pointEntity.setNextUpdateTime(LocalDateTime.now().plus(pointEntity.getCalculateFrequency(), ChronoUnit.SECONDS));
             //更新redis缓存
             twinPointMapper.updateById(pointEntity);
             //孪生点位缓存
@@ -78,6 +78,8 @@ public class TwinPointServiceImpl extends ServiceImpl<TwinPointMapper, TwinPoint
             List<OPCItemValueRecordEntity> records = page.getRecords();
             if (CollectionUtils.isNotEmpty(records)) {
                 pointEntity.setPointValue(records.get(0).getItemValue());
+                //更新下次更新时间
+                pointEntity.setNextUpdateTime(LocalDateTime.now().plus(pointEntity.getCalculateFrequency(), ChronoUnit.SECONDS));
                 twinPointMapper.updateById(pointEntity);
                 this.twinPointCache(pointEntity);
             }

@@ -52,6 +52,9 @@ public class TwinPointEntity implements Serializable {
     @TableField("calculate_cycle")
     private Integer calculateCycle;
 
+    @TableField("calculate_frequency")
+    private Integer calculateFrequency;
+
     @TableField("warn_point_id")
     private Long warnPointId;
 
@@ -78,6 +81,9 @@ public class TwinPointEntity implements Serializable {
 
     @TableField("next_update_time")
     private LocalDateTime nextUpdateTime;
+
+    @TableField("avg_update_time")
+    private LocalDateTime avgUpdateTime;
 
     @TableField("create_time")
     private LocalDateTime createTime;
