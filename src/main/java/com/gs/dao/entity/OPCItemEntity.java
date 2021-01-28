@@ -22,6 +22,13 @@ public class OPCItemEntity {
     @TableField("item_id")
     private String itemId;
 
+    /**
+     * item由后台自行标注,不从opcserver中获取
+     */
+    @TableField("item_name")
+    private String itemName;
+
+
     @TableField("item_type")
     private String itemType;
 

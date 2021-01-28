@@ -2,7 +2,6 @@ package com.gs.controller;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
-import com.gs.DTO.ItemStatusDTO;
 import com.gs.VO.CommomResponse;
 import com.gs.dao.entity.OPCItemValueRecordEntity;
 import com.gs.dao.mapper.OPCItemValueRecordMapper;

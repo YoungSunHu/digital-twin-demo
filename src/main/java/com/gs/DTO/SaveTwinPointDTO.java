@@ -29,10 +29,10 @@ public class SaveTwinPointDTO implements Serializable {
 
     private String pointName;
 
-    @NotBlank(message = "pointId不得为空")
+    @NotBlank(message = "factoryId不得为空")
     private String factoryId;
 
-    @NotBlank(message = "pointId不得为空")
+    @NotBlank(message = "productionLineId不得为空")
     private String productionLineId;
 
     private String unit;
@@ -42,6 +42,8 @@ public class SaveTwinPointDTO implements Serializable {
     private Integer calculateSequence = 10000;
 
     private Integer calculateCycle = 3600;
+
+    private Integer calculateFrequency = 3600;
 
     private Long warnPointId;
 

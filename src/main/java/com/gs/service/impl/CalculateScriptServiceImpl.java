@@ -2,22 +2,21 @@ package com.gs.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gs.DTO.CalculateScriptTestDTO;
 import com.gs.config.Constant;
 import com.gs.dao.entity.OPCItemValueRecordEntity;
+import com.gs.dao.entity.TwinPointEntity;
+import com.gs.dao.mapper.TwinPointMapper;
 import com.gs.service.CalculateScriptService;
 import com.gs.service.OPCItemValueRecordService;
+import com.gs.service.TwinPointService;
 import org.apache.commons.lang3.StringUtils;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.sound.midi.Soundbank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -40,6 +39,9 @@ public class CalculateScriptServiceImpl implements CalculateScriptService {
     @Autowired
     OPCItemValueRecordService opcItemValueRecordService;
 
+    @Autowired
+    TwinPointMapper twinPointMapper;
+
     private static PythonInterpreter pyInterpreter = null;
 
     @Override
@@ -50,13 +52,16 @@ public class CalculateScriptServiceImpl implements CalculateScriptService {
         //redis取点位最新值
         for (String param : params) {
             String itemValue = null;
-            String s = stringRedisTemplate.opsForValue().get(Constant.REDIS_ITEM_CACHE_PREFIX + calculateScriptTestDTO.getFactoryId() + ":" + param);
+            //获取孪生点位数值
+            //String s = stringRedisTemplate.opsForValue().get(Constant.REDIS_ITEM_CACHE_PREFIX + calculateScriptTestDTO.getFactoryId() + ":" + param);
+            String s = stringRedisTemplate.opsForValue().get(Constant.REDIS_TWIN_POINT_CACHE_PREFIX + calculateScriptTestDTO.getFactoryId() + ":" + param);
             if (StringUtils.isEmpty(s)) {
-                List<OPCItemValueRecordEntity> records = opcItemValueRecordService.page(new Page(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", param).eq("factory_id", calculateScriptTestDTO.getFactoryId()).orderBy(true, false, "item_timestamp")).getRecords();
-                if (CollectionUtils.isEmpty(records)) {
+                //List<OPCItemValueRecordEntity> records = opcItemValueRecordService.page(new Page(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", param).eq("factory_id", calculateScriptTestDTO.getFactoryId()).orderBy(true, false, "item_timestamp")).getRecords();
+                TwinPointEntity twinPointEntity = twinPointMapper.selectOne(new QueryWrapper<TwinPointEntity>().eq("point_code", param).eq("production_line_id", calculateScriptTestDTO.getProductionLineId()).eq("factory_id", calculateScriptTestDTO.getFactoryId()));
+                if (twinPointEntity == null) {
                     throw new RuntimeException("点位" + param + "不存在!");
                 }
-                itemValue = records.get(0).getItemValue();
+                itemValue = twinPointEntity.getPointValue();
             } else {
                 itemValue = JSONObject.parseObject(s, OPCItemValueRecordEntity.class).getItemValue();
             }

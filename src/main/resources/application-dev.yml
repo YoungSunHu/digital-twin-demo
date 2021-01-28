@@ -24,7 +24,7 @@ spring:
         log4j2:
           statement-executable-sql-log-enable: true
   redis:
-    host: 52.83.241.9
+    host: 52.82.98.172
     password: gs12345
     port: 16379
     database: 1

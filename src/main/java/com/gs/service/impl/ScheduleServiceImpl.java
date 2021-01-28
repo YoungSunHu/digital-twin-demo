@@ -1,12 +1,11 @@
 package com.gs.service.impl;
 
+import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.gs.dao.entity.OPCItemEntity;
 import com.gs.dao.entity.TwinPointEntity;
-import com.gs.service.OPCItemService;
-import com.gs.service.OPCItemValueRecordService;
-import com.gs.service.ScheduleService;
-import com.gs.service.TwinPointService;
+import com.gs.dao.entity.TwinPointValueRecordEntity;
+import com.gs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Autowired
     OPCItemService opcItemService;
 
+    @Autowired
+    TwinPointValueRecordService twinPointValueRecordService;
+
+    Snowflake snowflake = new Snowflake(4, 4);
+
+
     @Override
     @Scheduled(cron = "*/10 * * * * ?")
     public void twinPointUpdate() {
@@ -34,6 +39,17 @@ public class ScheduleServiceImpl implements ScheduleService {
         twinPointEntities.forEach(
                 i -> {
                     twinPointService.pointValueUpdate(i.getId());
+                    //孪生点位数值记录
+                    TwinPointValueRecordEntity twinPointValueRecordEntity = new TwinPointValueRecordEntity();
+                    twinPointValueRecordEntity.setId(snowflake.nextId());
+                    twinPointValueRecordEntity.setDataType(i.getDataType());
+                    twinPointValueRecordEntity.setFactoryId(i.getFactoryId());
+                    twinPointValueRecordEntity.setTwinPointId(i.getPointId());
+                    twinPointValueRecordEntity.setTwinPointValue(i.getPointValue());
+                    twinPointValueRecordEntity.setTwinPointCode(i.getPointCode());
+                    twinPointValueRecordEntity.setProductionLineId(i.getProductionLineId());
+                    twinPointValueRecordEntity.setTwinPointName(i.getPointName());
+                    twinPointValueRecordService.save(twinPointValueRecordEntity);
                 }
         );
     }
