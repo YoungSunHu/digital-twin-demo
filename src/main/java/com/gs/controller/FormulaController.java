@@ -32,7 +32,7 @@ public class FormulaController {
      * @param dto
      * @return
      */
-    @PostMapping("/HFSF" + "/CompoundFertilizerFormula" + "/Save")
+    @PostMapping("/HFSF" + "/CompoundFertilizerFormula" + "/save")
     public CommomResponse HFSFCompoundFertilizerFormula(@RequestBody HFSFCompoundFertilizerFormulaDTO dto) {
         //配方换算
         HFSFCompoundFertilizerFormulaDTO hfsfCompoundFertilizerFormulaDTO = formulaService.HFSFCompoundFertilizerFormulaHandler(dto);
@@ -44,7 +44,7 @@ public class FormulaController {
         formulaEntity.setFormulaCode("15-15-15");
         formulaEntity.setId(1L);
         //储存配方
-        formulaService.saveOrUpdate(formulaEntity);
+        formulaService.updateById(formulaEntity);
         return CommomResponse.data("success", hfsfCompoundFertilizerFormulaDTO);
     }
 
