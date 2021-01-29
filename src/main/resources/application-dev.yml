@@ -41,6 +41,6 @@ mybatis-plus:
 logging:
   file: ../digitail-twin-demo/logs/digitail-twin-demo.log
   level:
-    com.gs.*: info
+    com.gs.*: debug
 server:
   port: 8765

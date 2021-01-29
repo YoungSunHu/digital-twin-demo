@@ -1,5 +1,6 @@
 package com.gs.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -22,7 +23,7 @@ import java.time.LocalDateTime;
 @TableName(value = "public.twin_point")
 public class TwinPointEntity implements Serializable {
 
-    @TableId("id")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @TableField("point_id")

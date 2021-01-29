@@ -1,5 +1,6 @@
 package com.gs.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -13,10 +14,10 @@ import java.time.LocalDateTime;
  * @modified By：
  */
 @Data
-@TableName("factory_formula")
+@TableName("formula")
 public class FormulaEntity {
 
-    @TableId("id")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @TableField("factory_id")

@@ -25,8 +25,6 @@ public class FormulaController {
     @Autowired
     FormulaService formulaService;
 
-    Snowflake snowflake = new Snowflake(3, 3);
-
     /**
      * 合肥四方集团公司复混肥配方通知书
      * 红四方工厂
@@ -39,14 +37,14 @@ public class FormulaController {
         //配方换算
         HFSFCompoundFertilizerFormulaDTO hfsfCompoundFertilizerFormulaDTO = formulaService.HFSFCompoundFertilizerFormulaHandler(dto);
         FormulaEntity formulaEntity = new FormulaEntity();
-        formulaEntity.setId(snowflake.nextId());
         formulaEntity.setFormulaJson(JSON.toJSONString(hfsfCompoundFertilizerFormulaDTO));
         formulaEntity.setFactoryId("AHHSF001");
         formulaEntity.setFormulaName("尿基复合肥(45%)");
         formulaEntity.setFormulaModel("15-15-15（含氯）");
         formulaEntity.setFormulaCode("15-15-15");
+        formulaEntity.setId(1L);
         //储存配方
-        formulaService.save(formulaEntity);
+        formulaService.saveOrUpdate(formulaEntity);
         return CommomResponse.data("success", hfsfCompoundFertilizerFormulaDTO);
     }
 

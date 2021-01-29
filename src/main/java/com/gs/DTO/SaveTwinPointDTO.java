@@ -41,9 +41,15 @@ public class SaveTwinPointDTO implements Serializable {
 
     private Integer calculateSequence = 10000;
 
+    /**
+     * 均值计算周期
+     */
     private Integer calculateCycle = 3600;
 
-    private Integer calculateFrequency = 3600;
+    /**
+     * 当前值计算频率:
+     */
+    private Integer calculateFrequency = 1800;
 
     private Long warnPointId;
 

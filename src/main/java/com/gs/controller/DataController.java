@@ -1,7 +1,5 @@
 package com.gs.controller;
 
-import cn.hutool.core.lang.Snowflake;
-import cn.hutool.core.util.IdUtil;
 import com.gs.VO.CommomResponse;
 import com.gs.dao.entity.OPCItemValueRecordEntity;
 import com.gs.dao.mapper.OPCItemValueRecordMapper;
@@ -29,12 +27,10 @@ public class DataController {
     @Autowired
     OPCItemValueRecordService opcItemValueRecordService;
 
-    Snowflake snowflake = IdUtil.createSnowflake(1, 1);
-
     @PostMapping("/itemUpload")
     public CommomResponse itemUpload(@RequestBody OPCItemValueRecordEntity entity) {
         log.info("接收OPCItem数据:{}", entity.toString());
-        entity.setId(snowflake.nextId());
+        entity.setId(null);
         opcItemValueRecordMapper.insert(entity);
         opcItemValueRecordService.itemCache(entity);
         return CommomResponse.success("success");

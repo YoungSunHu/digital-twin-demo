@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gs.DTO.ItemStatusDTO;
 import com.gs.config.Constant;
+import com.gs.dao.entity.OPCItemAvgEntity;
 import com.gs.dao.entity.OPCItemEntity;
 import com.gs.dao.entity.OPCItemValueRecordEntity;
 import com.gs.dao.mapper.OPCItemValueRecordMapper;
+import com.gs.service.OPCItemAvgService;
 import com.gs.service.OPCItemService;
 import com.gs.service.OPCItemValueRecordService;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +43,9 @@ public class OPCItemValueRecordServiceImpl extends ServiceImpl<OPCItemValueRecor
 
     @Autowired
     OPCItemService opcItemService;
+
+    @Autowired
+    OPCItemAvgService opcItemAvgService;
 
     @Override
     @Async
@@ -83,7 +88,15 @@ public class OPCItemValueRecordServiceImpl extends ServiceImpl<OPCItemValueRecor
         if (opcItemEntity == null) {
             return;
         }
-        Double avg = opcItemValueRecordMapper.itemAverage(opcItemEntity.getFactoryId(), opcItemEntity.getItemId(), LocalDateTime.now().minus(3600, ChronoUnit.SECONDS), LocalDateTime.now());
+        Double avg = opcItemValueRecordMapper.itemAverage(opcItemEntity.getFactoryId(), opcItemEntity.getItemId(), LocalDateTime.now().minus(opcItemEntity.getAvgUpdateCycle(), ChronoUnit.SECONDS), LocalDateTime.now());
+        OPCItemAvgEntity opcItemAvgEntity = new OPCItemAvgEntity();
+        opcItemAvgEntity.setItemAvgValue(String.valueOf(avg));
+        opcItemAvgEntity.setItemType(opcItemEntity.getItemType());
+        opcItemAvgEntity.setItemId(opcItemEntity.getItemId());
+        opcItemAvgEntity.setFactoryId(opcItemEntity.getFactoryId());
+        opcItemEntity.setAvgUpdateTime(LocalDateTime.now().plus(opcItemEntity.getAvgUpdateCycle(), ChronoUnit.SECONDS));
+        opcItemAvgService.save(opcItemAvgEntity);
         stringRedisTemplate.opsForValue().set(Constant.REDIS_ITEM_AVG_CACHE_PREFIX + opcItemEntity.getFactoryId() + ":" + opcItemEntity.getItemId(), String.valueOf(avg));
+        opcItemService.updateById(opcItemEntity);
     }
 }

@@ -5,6 +5,6 @@
 
 
     <select id="twinPointAvg" resultType="java.lang.Float">
-        select avg(twin_point_value::numeric) from twin_point_value_record where point_id = #{pointId}
+        select avg(twin_point_value::numeric) from twin_point_value_record where point_id = #{pointId} and create_time between #{startDate} and #{endDate}
     </select>
 </mapper>

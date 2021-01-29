@@ -1,5 +1,6 @@
 package com.gs.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -21,14 +22,14 @@ import java.time.LocalDateTime;
 @TableName(value = "public.twin_point_value_record")
 public class TwinPointValueRecordEntity implements Serializable {
 
-    @TableId("id")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     /**
      * 孪生点位主键id
      */
     @TableField("point_id")
-    private String pointId;
+    private Long pointId;
 
     /**
      * 孪生点位id

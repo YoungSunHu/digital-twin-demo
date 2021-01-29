@@ -9,13 +9,8 @@ import com.gs.DTO.*;
 import com.gs.VO.CommomResponse;
 import com.gs.VO.ItemStatusVO;
 import com.gs.config.Constant;
-import com.gs.dao.entity.OPCItemEntity;
-import com.gs.dao.entity.OPCItemValueRecordEntity;
-import com.gs.dao.entity.TwinPointEntity;
-import com.gs.service.CalculateScriptService;
-import com.gs.service.OPCItemService;
-import com.gs.service.OPCItemValueRecordService;
-import com.gs.service.TwinPointService;
+import com.gs.dao.entity.*;
+import com.gs.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +50,14 @@ public class TwinPointController {
     @Autowired
     StringRedisTemplate stringRedisTemplate;
 
-    Snowflake snowflake = new Snowflake(2, 2);
+    @Autowired
+    TwinPointAvgService twinPointAvgService;
+
+    @Autowired
+    TwinPointValueRecordService twinPointValueRecordService;
+
+    @Autowired
+    OPCItemAvgService opcItemAvgService;
 
     /**
      * dcs点位列表
@@ -79,6 +81,8 @@ public class TwinPointController {
         int count = twinPointService.count(new QueryWrapper<TwinPointEntity>().eq("point_id", saveTwinPointDTO.getPointId()).eq("factory_id", saveTwinPointDTO.getFactoryId()));
         if (count > 0) {
             throw new RuntimeException("点位" + saveTwinPointDTO.getPointId() + "已存在");
+        } else if (saveTwinPointDTO.getCalculateFrequency() >= saveTwinPointDTO.getCalculateCycle()) {
+            throw new RuntimeException("计算周期必须大于计算频率");
         }
         TwinPointEntity twinPointEntity = new TwinPointEntity();
         Double aDouble = null;
@@ -101,7 +105,6 @@ public class TwinPointController {
         twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateFrequency(), ChronoUnit.SECONDS));
         //均值更新时间
         twinPointEntity.setAvgUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
-        twinPointEntity.setId(snowflake.nextId());
         BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
         twinPointService.save(twinPointEntity);
         return CommomResponse.success("保存成功");
@@ -204,6 +207,93 @@ public class TwinPointController {
                 }
         );
         return CommomResponse.data("success", vos);
+    }
+
+    /**
+     * 孪生点位均值曲线
+     *
+     * @param twinPointAvgLineDTO
+     * @return
+     */
+    @PostMapping("/twinPointAvgLine")
+    public CommomResponse twinPointAvgLine(@RequestBody TwinPointAvgLineDTO twinPointAvgLineDTO) {
+        QueryWrapper<TwinPointAvgEntity> objectQueryWrapper = new QueryWrapper<TwinPointAvgEntity>()
+                .eq("twin_point_id", twinPointAvgLineDTO.getTwinPointId())
+                .eq("factory_id", twinPointAvgLineDTO.getFactoryId())
+                .between("create_time", twinPointAvgLineDTO.getStartDate(), twinPointAvgLineDTO.getEndDate());
+        int count = twinPointAvgService.count(objectQueryWrapper);
+        if (count == 0) {
+            return CommomResponse.data("success", null);
+        }
+        int step = (count / twinPointAvgLineDTO.getPointStep()) > 0 ? (count / twinPointAvgLineDTO.getPointStep()) : 1;
+        objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "create_time");
+
+        List<TwinPointAvgEntity> list = twinPointAvgService.list(objectQueryWrapper);
+        return CommomResponse.data("success", list);
+    }
+
+    /**
+     * 孪生点位曲线
+     *
+     * @param twinPointLineDTO
+     * @return
+     */
+    @PostMapping("/twinPointLine")
+    public CommomResponse twinPointLine(@RequestBody TwinPointLineDTO twinPointLineDTO) {
+        QueryWrapper<TwinPointValueRecordEntity> objectQueryWrapper = new QueryWrapper<TwinPointValueRecordEntity>()
+                .eq("twin_point_id", twinPointLineDTO.getTwinPointId())
+                .eq("factory_id", twinPointLineDTO.getFactoryId())
+                .between("create_time", twinPointLineDTO.getStartDate(), twinPointLineDTO.getEndDate());
+        int count = twinPointValueRecordService.count(objectQueryWrapper);
+        if (count == 0) {
+            return CommomResponse.data("success", null);
+        }
+        int step = (count / twinPointLineDTO.getPointStep()) > 0 ? (count / twinPointLineDTO.getPointStep()) : 1;
+        objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "create_time");
+        List<TwinPointValueRecordEntity> list = twinPointValueRecordService.list(objectQueryWrapper);
+        return CommomResponse.data("success", list);
+    }
+
+    /**
+     * dcs点位曲线
+     *
+     * @param itemLineDTO
+     * @return
+     */
+    @PostMapping("/itemLine")
+    public CommomResponse itemLine(@RequestBody ItemLineDTO itemLineDTO) {
+        QueryWrapper<OPCItemValueRecordEntity> objectQueryWrapper = new QueryWrapper<OPCItemValueRecordEntity>()
+                .eq("item_id", itemLineDTO.getItemId())
+                .between("create_time", itemLineDTO.getStartDate(), itemLineDTO.getEndDate());
+        int count = opcItemValueRecordService.count(objectQueryWrapper);
+        if (count == 0) {
+            return CommomResponse.data("success", null);
+        }
+        int step = (count / itemLineDTO.getPointStep()) > 0 ? (count / itemLineDTO.getPointStep()) : 1;
+        objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "item_timestamp");
+        List<OPCItemValueRecordEntity> list = opcItemValueRecordService.list(objectQueryWrapper);
+        return CommomResponse.data("success", list);
+    }
+
+    /**
+     * dcs点位均值曲线
+     *
+     * @param itemLineDTO
+     * @return
+     */
+    @PostMapping("/itemAvgLine")
+    public CommomResponse itemAvgLine(@RequestBody ItemLineDTO itemLineDTO) {
+        QueryWrapper<OPCItemAvgEntity> objectQueryWrapper = new QueryWrapper<OPCItemAvgEntity>()
+                .eq("item_id", itemLineDTO.getItemId())
+                .between("create_time", itemLineDTO.getStartDate(), itemLineDTO.getEndDate());
+        int count = opcItemAvgService.count(objectQueryWrapper);
+        if (count == 0) {
+            return CommomResponse.data("success", null);
+        }
+        int step = (count / itemLineDTO.getPointStep()) > 0 ? (count / itemLineDTO.getPointStep()) : 1;
+        objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "create_time");
+        List<OPCItemAvgEntity> list = opcItemAvgService.list(objectQueryWrapper);
+        return CommomResponse.data("success", list);
     }
 
 }

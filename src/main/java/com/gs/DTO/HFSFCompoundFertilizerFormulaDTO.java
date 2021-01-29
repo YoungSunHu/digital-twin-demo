@@ -1,11 +1,11 @@
 package com.gs.DTO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,6 +48,7 @@ public class HFSFCompoundFertilizerFormulaDTO implements Serializable {
     /**
      * 配方日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime formualDate;
 
     /**
@@ -89,6 +90,11 @@ public class HFSFCompoundFertilizerFormulaDTO implements Serializable {
      * 配合式: P
      */
     Float P = 0f;
+
+    /**
+     * 配合式: K
+     */
+    Float K = 0f;
 
     /**
      * 配合式: CL-

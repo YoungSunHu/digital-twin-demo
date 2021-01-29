@@ -29,6 +29,10 @@ public class HFSFCompoundFertilizerFormulaDetailDTO implements Serializable {
     @NotBlank(message = "rawMaterialName不得为空")
     String rawMaterialName;
     /**
+     * 养分含量
+     */
+    Float nutrientContent = 0f;
+    /**
      * 水分
      */
     Float waterContent = 0f;

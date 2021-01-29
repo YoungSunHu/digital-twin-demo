@@ -10,45 +10,29 @@ import java.time.LocalDateTime;
 
 /**
  * @author ：YoungSun
- * @date ：Created in 2021/1/23 10:31
+ * @date ：Created in 2021/1/29 10:57
  * @modified By：
  */
 @Data
-@TableName("opc_item")
-public class OPCItemEntity {
+@TableName("opc_item_avg")
+public class OPCItemAvgEntity {
+
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
-    @TableField("factory_id")
-    private String factoryId;
 
     @TableField("item_id")
     private String itemId;
 
-    /**
-     * item由后台自行标注,不从opcserver中获取
-     */
-    @TableField("item_name")
-    private String itemName;
-    /**
-     * 均值更新周期
-     */
-    @TableField("avg_update_cycle")
-    private Integer avgUpdateCycle;
-
-    /**
-     * 均值更新时间
-     */
-    @TableField("avg_update_time")
-    private LocalDateTime avgUpdateTime;
-
-
     @TableField("item_type")
     private Integer itemType;
+
+    @TableField("item_avg_value")
+    private String itemAvgValue;
+
+    @TableField("factory_id")
+    private String factoryId;
 
     @TableField("create_time")
     private LocalDateTime createTime;
 
-    @TableField("update_time")
-    private LocalDateTime updateTime;
 }

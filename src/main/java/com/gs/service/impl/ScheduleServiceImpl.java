@@ -32,11 +32,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Autowired
     TwinPointAvgService twinPointAvgService;
 
-    Snowflake snowflake = new Snowflake(4, 4);
-
 
     @Override
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "*/1 * * * * ?")
     public void twinPointUpdate() {
         //需要更新的点位 一次处理20个
         List<TwinPointEntity> twinPointEntities = twinPointService.twinPointForUpdateValue();
@@ -46,7 +44,6 @@ public class ScheduleServiceImpl implements ScheduleService {
                     twinPointService.pointValueUpdate(i.getId());
                     //孪生点位数值记录
                     TwinPointValueRecordEntity twinPointValueRecordEntity = new TwinPointValueRecordEntity();
-                    twinPointValueRecordEntity.setId(snowflake.nextId());
                     twinPointValueRecordEntity.setDataType(i.getDataType());
                     twinPointValueRecordEntity.setFactoryId(i.getFactoryId());
                     twinPointValueRecordEntity.setTwinPointId(i.getPointId());
@@ -54,16 +51,17 @@ public class ScheduleServiceImpl implements ScheduleService {
                     twinPointValueRecordEntity.setTwinPointCode(i.getPointCode());
                     twinPointValueRecordEntity.setProductionLineId(i.getProductionLineId());
                     twinPointValueRecordEntity.setTwinPointName(i.getPointName());
+                    twinPointValueRecordEntity.setPointId(i.getId());
                     twinPointValueRecordService.save(twinPointValueRecordEntity);
                 }
         );
     }
 
     @Override
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "*/1 * * * * ?")
     public void twinPointAverage() {
         //需要更新均值的孪生点位
-        List<TwinPointEntity> list = twinPointService.list(new QueryWrapper<TwinPointEntity>().in("data_type", 1, 2).gt("avg_update_time", LocalDateTime.now()));
+        List<TwinPointEntity> list = twinPointService.list(new QueryWrapper<TwinPointEntity>().in("data_type", 1, 2).lt("avg_update_time", LocalDateTime.now()));
         //统计均值
         for (TwinPointEntity pointEntity : list) {
             twinPointAvgService.twinPointAvg(pointEntity.getId());
@@ -73,10 +71,10 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "*/1 * * * * ?")
     public void itemAverage() {
         //需要统计均值的item
-        List<OPCItemEntity> entities = opcItemService.list(new QueryWrapper<OPCItemEntity>().in("item_type", 2, 3, 4));
+        List<OPCItemEntity> entities = opcItemService.list(new QueryWrapper<OPCItemEntity>().lt("avg_update_time", LocalDateTime.now()).in("item_type", 2, 3, 4));
         entities.forEach(
                 i -> {
                     opcItemValueRecordService.itemAverage(i.getId());
