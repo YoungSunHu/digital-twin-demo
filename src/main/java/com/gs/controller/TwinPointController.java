@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gs.DTO.*;
 import com.gs.VO.CommomResponse;
+import com.gs.VO.CompoundLineVO;
 import com.gs.VO.ItemStatusVO;
 import com.gs.config.Constant;
 import com.gs.dao.entity.*;
@@ -294,6 +295,68 @@ public class TwinPointController {
         objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "create_time");
         List<OPCItemAvgEntity> list = opcItemAvgService.list(objectQueryWrapper);
         return CommomResponse.data("success", list);
+    }
+
+    /**
+     * dcs点位均值曲线
+     *
+     * @param compoundLineDTO
+     * @return
+     */
+    @PostMapping("/compoundLine")
+    public CommomResponse compoundLine(@RequestBody CompoundLineDTO compoundLineDTO) {
+        CompoundLineVO compoundLineVO = new CompoundLineVO();
+        if (CollectionUtils.isNotEmpty(compoundLineDTO.getTwinPointIds())) {
+            for (String s : compoundLineDTO.getTwinPointIds()) {
+                TwinPointLineDTO twinPointLineDTO = new TwinPointLineDTO();
+                twinPointLineDTO.setTwinPointId(s);
+                twinPointLineDTO.setFactoryId(compoundLineDTO.getFactoryId());
+                twinPointLineDTO.setStartDate(compoundLineDTO.getStartDate());
+                twinPointLineDTO.setStartDate(compoundLineDTO.getEndDate());
+                twinPointLineDTO.setTwinPointId(s);
+                twinPointLineDTO.setPointStep(compoundLineDTO.getPointStep());
+                CommomResponse commomResponse = this.twinPointLine(twinPointLineDTO);
+                compoundLineVO.setTwinPointList((List) commomResponse.getData());
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(compoundLineDTO.getTwinPointAvgIds())) {
+            for (String s : compoundLineDTO.getTwinPointAvgIds()) {
+                TwinPointAvgLineDTO twinPointAvgLineDTO = new TwinPointAvgLineDTO();
+                twinPointAvgLineDTO.setFactoryId(compoundLineDTO.getFactoryId());
+                twinPointAvgLineDTO.setStartDate(twinPointAvgLineDTO.getStartDate());
+                twinPointAvgLineDTO.setEndDate(twinPointAvgLineDTO.getEndDate());
+                twinPointAvgLineDTO.setTwinPointId(s);
+                twinPointAvgLineDTO.setPointStep(compoundLineDTO.getPointStep());
+                CommomResponse commomResponse = this.twinPointAvgLine(twinPointAvgLineDTO);
+                compoundLineVO.setTwinPointAvgtList((List) commomResponse.getData());
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(compoundLineDTO.getItemIds())) {
+            for (String s : compoundLineDTO.getItemIds()) {
+                ItemLineDTO itemLineDTO = new ItemLineDTO();
+                itemLineDTO.setItemId(s);
+                itemLineDTO.setStartDate(compoundLineDTO.getStartDate());
+                itemLineDTO.setEndDate(compoundLineDTO.getEndDate());
+                itemLineDTO.setPointStep(compoundLineDTO.getPointStep());
+                CommomResponse commomResponse = this.itemLine(itemLineDTO);
+                compoundLineVO.setItemList((List) commomResponse.getData());
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(compoundLineDTO.getItemAvgIds())){
+            for (String s : compoundLineDTO.getItemAvgIds()) {
+                ItemLineDTO itemLineDTO = new ItemLineDTO();
+                itemLineDTO.setItemId(s);
+                itemLineDTO.setStartDate(compoundLineDTO.getStartDate());
+                itemLineDTO.setEndDate(compoundLineDTO.getEndDate());
+                itemLineDTO.setPointStep(compoundLineDTO.getPointStep());
+                CommomResponse commomResponse = this.itemAvgLine(itemLineDTO);
+                compoundLineVO.setItemAvgList((List) commomResponse.getData());
+            }
+        }
+        return CommomResponse.data("success", compoundLineVO);
     }
 
 }
