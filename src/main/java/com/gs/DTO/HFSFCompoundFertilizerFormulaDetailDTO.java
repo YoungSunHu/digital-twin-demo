@@ -19,7 +19,7 @@ import java.io.Serializable;
 @Validated
 public class HFSFCompoundFertilizerFormulaDetailDTO implements Serializable {
     /**
-     * 数据类型0=计算类型 1=固定类型
+     * 数据类型0=计算类型 1=固定类型 3=保留前一个的成品养分含量
      */
     Integer dataType = 0;
 

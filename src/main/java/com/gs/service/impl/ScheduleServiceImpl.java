@@ -52,6 +52,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                     twinPointValueRecordEntity.setProductionLineId(i.getProductionLineId());
                     twinPointValueRecordEntity.setTwinPointName(i.getPointName());
                     twinPointValueRecordEntity.setPointId(i.getId());
+                    twinPointValueRecordEntity.setUnit(i.getUnit());
                     twinPointValueRecordService.save(twinPointValueRecordEntity);
                 }
         );

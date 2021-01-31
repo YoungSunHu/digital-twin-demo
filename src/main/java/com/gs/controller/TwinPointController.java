@@ -1,14 +1,11 @@
 package com.gs.controller;
 
-import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gs.DTO.*;
-import com.gs.VO.CommomResponse;
-import com.gs.VO.CompoundLineVO;
-import com.gs.VO.ItemStatusVO;
+import com.gs.VO.*;
 import com.gs.config.Constant;
 import com.gs.dao.entity.*;
 import com.gs.service.*;
@@ -96,6 +93,8 @@ public class TwinPointController {
             calculateScriptTestDTO.setFactoryId(saveTwinPointDTO.getFactoryId());
             aDouble = calculateScriptService.calculateScriptRun(calculateScriptTestDTO);
             twinPointEntity.setPointValue(String.valueOf(aDouble));
+        } else if (saveTwinPointDTO.getDataType() == 1 && StringUtils.isBlank(saveTwinPointDTO.getItemId())) {
+            throw new RuntimeException("DCS点位ID不得为空");
         } else if (saveTwinPointDTO.getDataType() == 1) {
             //dcs点位
             IPage<OPCItemValueRecordEntity> page = opcItemValueRecordService.page(new Page<OPCItemValueRecordEntity>(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", saveTwinPointDTO.getItemId()).eq("factory_id", saveTwinPointDTO.getFactoryId()).orderBy(true, false, "item_timestamp"));
@@ -119,13 +118,36 @@ public class TwinPointController {
      */
     @PostMapping("/saveOrUpdateTwinPoint")
     public CommomResponse saveOrUpdateTwinPoint(@RequestBody @Validated SaveTwinPointDTO saveTwinPointDTO) {
+        if (saveTwinPointDTO.getCalculateFrequency() >= saveTwinPointDTO.getCalculateCycle()) {
+            throw new RuntimeException("计算周期必须大于计算频率");
+        }
+        TwinPointEntity twinPointEntity = twinPointService.getOne(new QueryWrapper<TwinPointEntity>().eq("point_id", saveTwinPointDTO.getPointId()));
+        if (twinPointEntity == null) {
+            twinPointEntity = new TwinPointEntity();
+        }
+        Double aDouble = null;
         if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isBlank(saveTwinPointDTO.getCalculateScript())) {
             throw new RuntimeException("计算脚本不得为空");
+        } else if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isNoneBlank(saveTwinPointDTO.getCalculateScript())) {
+            //脚本校验
+            CalculateScriptTestDTO calculateScriptTestDTO = new CalculateScriptTestDTO();
+            calculateScriptTestDTO.setCalculateScript(saveTwinPointDTO.getCalculateScript());
+            calculateScriptTestDTO.setFactoryId(saveTwinPointDTO.getFactoryId());
+            aDouble = calculateScriptService.calculateScriptRun(calculateScriptTestDTO);
+            twinPointEntity.setPointValue(String.valueOf(aDouble));
+        } else if (saveTwinPointDTO.getDataType() == 1 && StringUtils.isBlank(saveTwinPointDTO.getItemId())) {
+            throw new RuntimeException("DCS点位ID不得为空");
+        } else if (saveTwinPointDTO.getDataType() == 1) {
+            //dcs点位
+            IPage<OPCItemValueRecordEntity> page = opcItemValueRecordService.page(new Page<OPCItemValueRecordEntity>(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", saveTwinPointDTO.getItemId()).eq("factory_id", saveTwinPointDTO.getFactoryId()).orderBy(true, false, "item_timestamp"));
+            List<OPCItemValueRecordEntity> records = page.getRecords();
+            twinPointEntity.setPointValue(CollectionUtils.isEmpty(records) ? null : records.get(0).getItemValue());
         }
-        TwinPointEntity twinPointEntity = new TwinPointEntity();
         BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
         //下次更新时间
-        twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
+        twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateFrequency(), ChronoUnit.SECONDS));
+        //均值更新时间
+        twinPointEntity.setAvgUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
         twinPointService.saveOrUpdate(twinPointEntity, new QueryWrapper<TwinPointEntity>().eq("point_id", saveTwinPointDTO.getPointId()).eq("factory_id", saveTwinPointDTO.getFactoryId()));
         return CommomResponse.success("保存成功");
     }
@@ -306,17 +328,25 @@ public class TwinPointController {
     @PostMapping("/compoundLine")
     public CommomResponse compoundLine(@RequestBody CompoundLineDTO compoundLineDTO) {
         CompoundLineVO compoundLineVO = new CompoundLineVO();
+        List<TwinPointLineVO> twinPointLineVOS = new ArrayList<>();
+        List<TwinPointAvgLineVO> twinPointAvgLineVO = new ArrayList<>();
+        List<ItemLineVO> itemLineVOS = new ArrayList<>();
+        List<ItemAvgLineVO> itemAvgLineVOS = new ArrayList<>();
+
         if (CollectionUtils.isNotEmpty(compoundLineDTO.getTwinPointIds())) {
             for (String s : compoundLineDTO.getTwinPointIds()) {
                 TwinPointLineDTO twinPointLineDTO = new TwinPointLineDTO();
                 twinPointLineDTO.setTwinPointId(s);
                 twinPointLineDTO.setFactoryId(compoundLineDTO.getFactoryId());
                 twinPointLineDTO.setStartDate(compoundLineDTO.getStartDate());
-                twinPointLineDTO.setStartDate(compoundLineDTO.getEndDate());
+                twinPointLineDTO.setEndDate(compoundLineDTO.getEndDate());
                 twinPointLineDTO.setTwinPointId(s);
                 twinPointLineDTO.setPointStep(compoundLineDTO.getPointStep());
                 CommomResponse commomResponse = this.twinPointLine(twinPointLineDTO);
-                compoundLineVO.setTwinPointList((List) commomResponse.getData());
+                TwinPointLineVO twinPointLineVO = new TwinPointLineVO();
+                twinPointLineVO.setTwinPointId(s);
+                twinPointLineVO.setTwinPointList((List) commomResponse.getData());
+                twinPointLineVOS.add(twinPointLineVO);
             }
         }
 
@@ -324,12 +354,15 @@ public class TwinPointController {
             for (String s : compoundLineDTO.getTwinPointAvgIds()) {
                 TwinPointAvgLineDTO twinPointAvgLineDTO = new TwinPointAvgLineDTO();
                 twinPointAvgLineDTO.setFactoryId(compoundLineDTO.getFactoryId());
-                twinPointAvgLineDTO.setStartDate(twinPointAvgLineDTO.getStartDate());
-                twinPointAvgLineDTO.setEndDate(twinPointAvgLineDTO.getEndDate());
+                twinPointAvgLineDTO.setStartDate(compoundLineDTO.getStartDate());
+                twinPointAvgLineDTO.setEndDate(compoundLineDTO.getEndDate());
                 twinPointAvgLineDTO.setTwinPointId(s);
                 twinPointAvgLineDTO.setPointStep(compoundLineDTO.getPointStep());
                 CommomResponse commomResponse = this.twinPointAvgLine(twinPointAvgLineDTO);
-                compoundLineVO.setTwinPointAvgtList((List) commomResponse.getData());
+                TwinPointAvgLineVO twinPointAvgLineVO1 = new TwinPointAvgLineVO();
+                twinPointAvgLineVO1.setTwinPointId(s);
+                twinPointAvgLineVO1.setTwinPointAvgList((List) commomResponse.getData());
+                twinPointAvgLineVO.add(twinPointAvgLineVO1);
             }
         }
 
@@ -341,11 +374,14 @@ public class TwinPointController {
                 itemLineDTO.setEndDate(compoundLineDTO.getEndDate());
                 itemLineDTO.setPointStep(compoundLineDTO.getPointStep());
                 CommomResponse commomResponse = this.itemLine(itemLineDTO);
-                compoundLineVO.setItemList((List) commomResponse.getData());
+                ItemLineVO itemLineVO = new ItemLineVO();
+                itemLineVO.setItemId(s);
+                itemLineVO.setItemList((List) commomResponse.getData());
+                itemLineVOS.add(itemLineVO);
             }
         }
 
-        if (CollectionUtils.isNotEmpty(compoundLineDTO.getItemAvgIds())){
+        if (CollectionUtils.isNotEmpty(compoundLineDTO.getItemAvgIds())) {
             for (String s : compoundLineDTO.getItemAvgIds()) {
                 ItemLineDTO itemLineDTO = new ItemLineDTO();
                 itemLineDTO.setItemId(s);
@@ -353,9 +389,16 @@ public class TwinPointController {
                 itemLineDTO.setEndDate(compoundLineDTO.getEndDate());
                 itemLineDTO.setPointStep(compoundLineDTO.getPointStep());
                 CommomResponse commomResponse = this.itemAvgLine(itemLineDTO);
-                compoundLineVO.setItemAvgList((List) commomResponse.getData());
+                ItemAvgLineVO itemAvgLineVO = new ItemAvgLineVO();
+                itemAvgLineVO.setItemId(s);
+                itemAvgLineVO.setItemAvgList((List) commomResponse.getData());
+                itemAvgLineVOS.add(itemAvgLineVO);
             }
         }
+        compoundLineVO.setTwinPointList(twinPointLineVOS);
+        compoundLineVO.setTwinPointAvgtList(twinPointAvgLineVO);
+        compoundLineVO.setItemList(itemLineVOS);
+        compoundLineVO.setItemAvgList(itemAvgLineVOS);
         return CommomResponse.data("success", compoundLineVO);
     }
 

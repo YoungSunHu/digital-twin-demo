@@ -17,6 +17,18 @@ import org.springframework.stereotype.Service;
 public class FormulaServiceImpl extends ServiceImpl<FormulaMapper, FormulaEntity> implements FormulaService {
     @Override
     public HFSFCompoundFertilizerFormulaDTO HFSFCompoundFertilizerFormulaHandler(HFSFCompoundFertilizerFormulaDTO dto) {
+        //清零
+        dto.setTotalRawMaterialRatio(0f);
+        dto.setTotalWaterContent(0f);
+        dto.setTotalMaterialWeight(0f);
+        dto.setTotalProductNutrientContent(0f);
+        dto.setTotalProductNutrientContent(0f);
+        dto.setTotalUnitConsumption(0f);
+        dto.setNutrientConversionFactor(0f);
+        dto.setN(0f);
+        dto.setP(0f);
+        dto.setK(0f);
+        dto.setCL_minus(0f);
         //物料重量合计
         dto.getDetails().forEach(
                 i -> {
@@ -61,8 +73,26 @@ public class FormulaServiceImpl extends ServiceImpl<FormulaMapper, FormulaEntity
         dto.setManufacturingCost(dto.getTotalRawMaterialCost() + 154);
         //生产毛利=控制成本-生产成本
         dto.setGrossProfitOfProduction(dto.getCostControl() - dto.getManufacturingCost());
-        //配合式子
 
+        //配合式
+        for (HFSFCompoundFertilizerFormulaDetailDTO detail : dto.getDetails()) {
+            if (detail.getRawMaterialName().equals("碳铵") || detail.getRawMaterialName().equals("液氨") || detail.getRawMaterialName().equals("尿素") || detail.getRawMaterialName().equals("氯化铵") || detail.getRawMaterialName().equals("返料(N)") || (detail.getRawMaterialName().equals("磷一铵") && detail.getDataType() == 3)) {
+                dto.setN(dto.getN() + detail.getProductNutrientContent());
+            } else if (detail.getRawMaterialName().equals("返料(P)") || detail.getRawMaterialName().equals("普钙") || (detail.getRawMaterialName().equals("磷一铵") && detail.getDataType() == 0)) {
+                dto.setP(dto.getP() + detail.getProductNutrientContent());
+            } else if (detail.getRawMaterialName().equals("返料(K)") || detail.getRawMaterialName().equals("氯化钾(红)") || detail.getRawMaterialName().equals("氯化钾(白)") || detail.getRawMaterialName().equals("控失剂(白)")) {
+                dto.setK(dto.getK() + detail.getProductNutrientContent());
+            }
+
+            if (detail.getRawMaterialName().equals("氯化钾(红)")) {
+                dto.setCL_minus(dto.getCL_minus() + (detail.getRawMaterialRatio() * 47) / 100);
+            } else if (detail.getRawMaterialName().equals("氯化钾(白)")) {
+                dto.setCL_minus(dto.getCL_minus() + (detail.getRawMaterialRatio() * 47) / 100);
+            } else if (detail.getRawMaterialName().equals("氯化铵")) {
+                dto.setCL_minus(dto.getCL_minus() + (detail.getRawMaterialRatio() * 67) / 100);
+            }
+        }
+        dto.setCL_minus(dto.getCL_minus() * dto.getNutrientConversionFactor());
         return dto;
     }
 }
