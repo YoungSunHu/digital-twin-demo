@@ -11,6 +11,7 @@ import com.gs.config.Constant;
 import com.gs.dao.entity.OPCItemValueRecordEntity;
 import com.gs.dao.entity.TwinPointEntity;
 import com.gs.dao.mapper.TwinPointMapper;
+import com.gs.exception.BussinessException;
 import com.gs.service.CalculateScriptService;
 import com.gs.service.OPCItemValueRecordService;
 import com.gs.service.TwinPointService;
@@ -57,12 +58,13 @@ public class TwinPointServiceImpl extends ServiceImpl<TwinPointMapper, TwinPoint
     public void pointValueUpdate(Long pointId) {
         TwinPointEntity pointEntity = twinPointMapper.selectOne(new QueryWrapper<TwinPointEntity>().eq("id", pointId));
         if (pointEntity == null) {
-            throw new RuntimeException("孪生点位不存在");
+            throw new BussinessException("孪生点位不存在");
         }
         if (pointEntity.getDataType() == 2) {
             CalculateScriptTestDTO calculateScriptTestDTO = new CalculateScriptTestDTO();
             calculateScriptTestDTO.setFactoryId(pointEntity.getFactoryId());
             calculateScriptTestDTO.setCalculateScript(pointEntity.getCalculateScript());
+            calculateScriptTestDTO.setProductionLineId(pointEntity.getProductionLineId());
             Double aDouble = calculateScriptService.calculateScriptRun(calculateScriptTestDTO);
             BigDecimal b = new BigDecimal(aDouble);
             aDouble = b.setScale(pointEntity.getDecimalPalces(), BigDecimal.ROUND_HALF_UP).doubleValue();

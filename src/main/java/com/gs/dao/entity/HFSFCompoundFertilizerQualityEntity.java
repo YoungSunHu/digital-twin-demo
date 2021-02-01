@@ -3,11 +3,13 @@ package com.gs.dao.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -19,14 +21,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Validated
+@TableName("hfsf_compound_fertilizer_quality")
 public class HFSFCompoundFertilizerQualityEntity {
+
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
      * 日期
      */
     @TableField("date")
-    private LocalDateTime date;
+    private LocalDate date;
     /**
      * 品名
      */
@@ -79,80 +83,80 @@ public class HFSFCompoundFertilizerQualityEntity {
      * 甲一级品
      */
     @TableField("a_first_class")
-    private Float AFirstClass = 0f;
+    private Float aFirstClass = 0f;
     /**
      * 甲自用包
      */
     @TableField("a_own_use_package")
-    private Float AOwnUsePackage = 0f;
+    private Float aOwnUsePackage = 0f;
     /**
      * 甲超养分
      */
     @TableField("a_over_nutrition")
-    private Float AOverNutrition = 0f;
+    private Float aOverNutrition = 0f;
     /**
      * 甲超水分
      */
     @TableField("a_over_water")
-    private Float AOverWater = 0f;
+    private Float aOverWater = 0f;
     /**
      * 甲不合格
      */
     @TableField("a_unqualified")
-    private Float AUnqualified = 0f;
+    private Float aUnqualified = 0f;
 
 
     /**
      * 乙一级品
      */
     @TableField("b_first_class")
-    private Float BFirstClass = 0f;
+    private Float bFirstClass = 0f;
     /**
      * 乙自用包
      */
     @TableField("b_own_use_package")
-    private Float BOwnUsePackage = 0f;
+    private Float bOwnUsePackage = 0f;
     /**
      * 乙超养分
      */
     @TableField("b_over_nutrition")
-    private Float BOverNutrition = 0f;
+    private Float bOverNutrition = 0f;
     /**
      * 乙超水分
      */
     @TableField("b_over_water")
-    private Float BOverWater = 0f;
+    private Float bOverWater = 0f;
     /**
      * 乙不合格
      */
     @TableField("b_unqualified")
-    private Float BUnqualified = 0f;
+    private Float bUnqualified = 0f;
 
     /**
      * 丙一级品
      */
     @TableField("c_first_class")
-    private Float CFirstClass = 0f;
+    private Float cFirstClass = 0f;
     /**
      * 丙自用包
      */
     @TableField("c_own_use_package")
-    private Float COwnUsePackage = 0f;
+    private Float cOwnUsePackage = 0f;
     /**
      * 丙超养分
      */
     @TableField("c_over_nutrition")
-    private Float COverNutrition = 0f;
+    private Float cOverNutrition = 0f;
     /**
      * 丙超水分
      */
     @TableField("c_over_water")
-    private Float COverWater = 0f;
+    private Float cOverWater = 0f;
     /**
      * 丙不合格
      */
     @TableField("c_unqualified")
-    private Float CUnqualified = 0f;
+    private Float cUnqualified = 0f;
 
 
     /**
@@ -164,22 +168,22 @@ public class HFSFCompoundFertilizerQualityEntity {
      * 丁自用包
      */
     @TableField("d_own_use_package")
-    private Float DOwnUsePackage = 0f;
+    private Float dOwnUsePackage = 0f;
     /**
      * 丁超养分
      */
     @TableField("d_over_nutrition")
-    private Float DOverNutrition = 0f;
+    private Float dOverNutrition = 0f;
     /**
      * 丁超水分
      */
     @TableField("d_over_water")
-    private Float DOverWater = 0f;
+    private Float dOverWater = 0f;
     /**
      * 丁不合格
      */
     @TableField("d_unqualified")
-    private Float DUnqualified = 0f;
+    private Float dUnqualified = 0f;
 
     /**
      * 班产
@@ -209,5 +213,6 @@ public class HFSFCompoundFertilizerQualityEntity {
     private LocalDateTime createTime;
 
     @TableField("update_time")
-    private LocalDateTime updateTime;
+    private LocalDateTime updateTime = LocalDateTime.now();
+
 }

@@ -8,6 +8,7 @@ import com.gs.DTO.*;
 import com.gs.VO.*;
 import com.gs.config.Constant;
 import com.gs.dao.entity.*;
+import com.gs.exception.BussinessException;
 import com.gs.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -78,14 +79,14 @@ public class TwinPointController {
     public CommomResponse saveTwinPoint(@RequestBody @Validated SaveTwinPointDTO saveTwinPointDTO) {
         int count = twinPointService.count(new QueryWrapper<TwinPointEntity>().eq("point_id", saveTwinPointDTO.getPointId()).eq("factory_id", saveTwinPointDTO.getFactoryId()));
         if (count > 0) {
-            throw new RuntimeException("点位" + saveTwinPointDTO.getPointId() + "已存在");
+            throw new BussinessException("点位" + saveTwinPointDTO.getPointId() + "已存在");
         } else if (saveTwinPointDTO.getCalculateFrequency() >= saveTwinPointDTO.getCalculateCycle()) {
-            throw new RuntimeException("计算周期必须大于计算频率");
+            throw new BussinessException("计算周期必须大于计算频率");
         }
         TwinPointEntity twinPointEntity = new TwinPointEntity();
         Double aDouble = null;
         if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isBlank(saveTwinPointDTO.getCalculateScript())) {
-            throw new RuntimeException("计算脚本不得为空");
+            throw new BussinessException("计算脚本不得为空");
         } else if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isNoneBlank(saveTwinPointDTO.getCalculateScript())) {
             //脚本校验
             CalculateScriptTestDTO calculateScriptTestDTO = new CalculateScriptTestDTO();
@@ -94,7 +95,7 @@ public class TwinPointController {
             aDouble = calculateScriptService.calculateScriptRun(calculateScriptTestDTO);
             twinPointEntity.setPointValue(String.valueOf(aDouble));
         } else if (saveTwinPointDTO.getDataType() == 1 && StringUtils.isBlank(saveTwinPointDTO.getItemId())) {
-            throw new RuntimeException("DCS点位ID不得为空");
+            throw new BussinessException("DCS点位ID不得为空");
         } else if (saveTwinPointDTO.getDataType() == 1) {
             //dcs点位
             IPage<OPCItemValueRecordEntity> page = opcItemValueRecordService.page(new Page<OPCItemValueRecordEntity>(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", saveTwinPointDTO.getItemId()).eq("factory_id", saveTwinPointDTO.getFactoryId()).orderBy(true, false, "item_timestamp"));
@@ -119,7 +120,7 @@ public class TwinPointController {
     @PostMapping("/saveOrUpdateTwinPoint")
     public CommomResponse saveOrUpdateTwinPoint(@RequestBody @Validated SaveTwinPointDTO saveTwinPointDTO) {
         if (saveTwinPointDTO.getCalculateFrequency() >= saveTwinPointDTO.getCalculateCycle()) {
-            throw new RuntimeException("计算周期必须大于计算频率");
+            throw new BussinessException("计算周期必须大于计算频率");
         }
         TwinPointEntity twinPointEntity = twinPointService.getOne(new QueryWrapper<TwinPointEntity>().eq("point_id", saveTwinPointDTO.getPointId()));
         if (twinPointEntity == null) {
@@ -127,16 +128,17 @@ public class TwinPointController {
         }
         Double aDouble = null;
         if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isBlank(saveTwinPointDTO.getCalculateScript())) {
-            throw new RuntimeException("计算脚本不得为空");
+            throw new BussinessException("计算脚本不得为空");
         } else if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isNoneBlank(saveTwinPointDTO.getCalculateScript())) {
             //脚本校验
             CalculateScriptTestDTO calculateScriptTestDTO = new CalculateScriptTestDTO();
             calculateScriptTestDTO.setCalculateScript(saveTwinPointDTO.getCalculateScript());
             calculateScriptTestDTO.setFactoryId(saveTwinPointDTO.getFactoryId());
+            calculateScriptTestDTO.setProductionLineId(saveTwinPointDTO.getProductionLineId());
             aDouble = calculateScriptService.calculateScriptRun(calculateScriptTestDTO);
             twinPointEntity.setPointValue(String.valueOf(aDouble));
         } else if (saveTwinPointDTO.getDataType() == 1 && StringUtils.isBlank(saveTwinPointDTO.getItemId())) {
-            throw new RuntimeException("DCS点位ID不得为空");
+            throw new BussinessException("DCS点位ID不得为空");
         } else if (saveTwinPointDTO.getDataType() == 1) {
             //dcs点位
             IPage<OPCItemValueRecordEntity> page = opcItemValueRecordService.page(new Page<OPCItemValueRecordEntity>(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", saveTwinPointDTO.getItemId()).eq("factory_id", saveTwinPointDTO.getFactoryId()).orderBy(true, false, "item_timestamp"));

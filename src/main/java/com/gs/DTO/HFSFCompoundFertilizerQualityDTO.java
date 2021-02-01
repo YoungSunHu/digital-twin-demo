@@ -1,11 +1,14 @@
 package com.gs.DTO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
-import java.time.LocalDateTime;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 /**
  * @author ：YoungSun
@@ -20,10 +23,13 @@ public class HFSFCompoundFertilizerQualityDTO {
     /**
      * 日期
      */
-    private LocalDateTime date;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @NotNull(message = "date不得为空")
+    private LocalDate date;
     /**
      * 品名
      */
+    @NotNull(message = "productionName不得为空")
     private String productionName;
 
     /**
@@ -39,17 +45,17 @@ public class HFSFCompoundFertilizerQualityDTO {
     /**
      * 养分 N
      */
-    private Float N = 0f;
+    private Float n = 0f;
 
     /**
      * 养分 P
      */
-    private Float P = 0f;
+    private Float p = 0f;
 
     /**
      * 养分 K
      */
-    private Float K = 0f;
+    private Float k = 0f;
 
     /**
      * 总养分
@@ -64,88 +70,108 @@ public class HFSFCompoundFertilizerQualityDTO {
     /**
      * 甲一级品
      */
-    private Float AFirstClass = 0f;
+    @JsonProperty(value = "aFirstClass")
+    private Float aFirstClass = 0f;
     /**
      * 甲自用包
      */
-    private Float AOwnUsePackage = 0f;
+    @JsonProperty(value = "aOwnUsePackage")
+    private Float aOwnUsePackage = 0f;
     /**
      * 甲超养分
      */
-    private Float AOverNutrition = 0f;
+    @JsonProperty(value = "aOverNutrition")
+    private Float aOverNutrition = 0f;
     /**
      * 甲超水分
      */
-    private Float AOverWater = 0f;
+    @JsonProperty(value = "aOverWater")
+    private Float aOverWater = 0f;
     /**
      * 甲不合格
      */
-    private Float AUnqualified = 0f;
+    @JsonProperty(value = "aUnqualified")
+    private Float aUnqualified = 0f;
 
 
     /**
      * 乙一级品
      */
-    private Float BFirstClass = 0f;
+    @JsonProperty(value = "bFirstClass")
+    private Float bFirstClass = 0f;
     /**
      * 乙自用包
      */
-    private Float BOwnUsePackage = 0f;
+    @JsonProperty(value = "bOwnUsePackage")
+    private Float bOwnUsePackage = 0f;
     /**
      * 乙超养分
      */
-    private Float BOverNutrition = 0f;
+    @JsonProperty(value = "bOverNutrition")
+    private Float bOverNutrition = 0f;
     /**
      * 乙超水分
      */
-    private Float BOverWater = 0f;
+    @JsonProperty(value = "bOverWater")
+    private Float bOverWater = 0f;
     /**
      * 乙不合格
      */
-    private Float BUnqualified = 0f;
+    @JsonProperty(value = "bUnqualified")
+    private Float bUnqualified = 0f;
 
     /**
      * 丙一级品
      */
-    private Float CFirstClass = 0f;
+    @JsonProperty(value = "cFirstClass")
+    private Float cFirstClass = 0f;
     /**
      * 丙自用包
      */
-    private Float COwnUsePackage = 0f;
+    @JsonProperty(value = "cOwnUsePackage")
+    private Float cOwnUsePackage = 0f;
     /**
      * 丙超养分
      */
-    private Float COverNutrition = 0f;
+    @JsonProperty(value = "cOverNutrition")
+    private Float cOverNutrition = 0f;
     /**
      * 丙超水分
      */
-    private Float COverWater = 0f;
+    @JsonProperty(value = "cOverWater")
+    private Float cOverWater = 0f;
     /**
      * 丙不合格
      */
-    private Float CUnqualified = 0f;
+    @JsonProperty(value = "cUnqualified")
+    private Float cUnqualified = 0f;
 
 
     /**
      * 丁一级品
      */
-    private Float DFirstClass = 0f;
+    @JsonProperty(value = "dFirstClass")
+    private Float dFirstClass = 0f;
     /**
      * 丁自用包
      */
-    private Float DOwnUsePackage = 0f;
+    @JsonProperty(value = "dOwnUsePackage")
+    private Float dOwnUsePackage = 0f;
     /**
      * 丁超养分
      */
-    private Float DOverNutrition = 0f;
+    @JsonProperty(value = "dOverNutrition")
+    private Float dOverNutrition = 0f;
     /**
      * 丁超水分
      */
-    private Float DOverWater = 0f;
+    @JsonProperty(value = "dOverWater")
+    private Float dOverWater = 0f;
     /**
      * 丁不合格
      */
-    private Float DUnqualified = 0f;
+    @JsonProperty(value = "dUnqualified")
+    private Float dUnqualified = 0f;
 
     /**
      * 班产

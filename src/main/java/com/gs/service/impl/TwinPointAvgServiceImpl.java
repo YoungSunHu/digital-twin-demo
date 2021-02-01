@@ -10,6 +10,7 @@ import com.gs.dao.entity.TwinPointValueRecordEntity;
 import com.gs.dao.mapper.TwinPointAvgMapper;
 import com.gs.dao.mapper.TwinPointMapper;
 import com.gs.dao.mapper.TwinPointValueRecordMapper;
+import com.gs.exception.BussinessException;
 import com.gs.service.OPCItemService;
 import com.gs.service.TwinPointAvgService;
 import org.apache.tomcat.jni.Local;
@@ -47,7 +48,7 @@ public class TwinPointAvgServiceImpl extends ServiceImpl<TwinPointAvgMapper, Twi
     public void twinPointAvg(Long twinPointId) {
         TwinPointEntity pointEntity = twinPointMapper.selectOne(new QueryWrapper<TwinPointEntity>().eq("id", twinPointId).orderBy(true, false, "calculate_sequence"));
         if (pointEntity == null) {
-            throw new RuntimeException("id:" + twinPointId + "孪生点位不存在");
+            throw new BussinessException("id:" + twinPointId + "孪生点位不存在");
         }
         OPCItemEntity item = opcItemService.getOne(new QueryWrapper<OPCItemEntity>().eq("factory_id", pointEntity.getFactoryId()).eq("item_id", pointEntity.getItemId()));
         if (item != null && item.getItemType() == 8) {

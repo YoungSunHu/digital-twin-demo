@@ -7,6 +7,7 @@ import com.gs.config.Constant;
 import com.gs.dao.entity.OPCItemValueRecordEntity;
 import com.gs.dao.entity.TwinPointEntity;
 import com.gs.dao.mapper.TwinPointMapper;
+import com.gs.exception.BussinessException;
 import com.gs.service.CalculateScriptService;
 import com.gs.service.OPCItemValueRecordService;
 import com.gs.service.TwinPointService;
@@ -59,7 +60,7 @@ public class CalculateScriptServiceImpl implements CalculateScriptService {
                 //List<OPCItemValueRecordEntity> records = opcItemValueRecordService.page(new Page(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", param).eq("factory_id", calculateScriptTestDTO.getFactoryId()).orderBy(true, false, "item_timestamp")).getRecords();
                 TwinPointEntity twinPointEntity = twinPointMapper.selectOne(new QueryWrapper<TwinPointEntity>().eq("point_code", param).eq("production_line_id", calculateScriptTestDTO.getProductionLineId()).eq("factory_id", calculateScriptTestDTO.getFactoryId()));
                 if (twinPointEntity == null) {
-                    throw new RuntimeException("点位" + param + "不存在!");
+                    throw new BussinessException("点位" + param + "不存在!");
                 }
                 itemValue = twinPointEntity.getPointValue();
             } else {
@@ -72,7 +73,7 @@ public class CalculateScriptServiceImpl implements CalculateScriptService {
         try {
             pythonInterpreter.exec(script);
         } catch (Exception e) {
-            throw new RuntimeException("脚本错误,请检查脚本:" + e.getMessage());
+            throw new BussinessException("脚本错误,请检查脚本:" + e.getMessage());
         }
         PyObject result = pythonInterpreter.get("result", PyObject.class);
         return result.asDouble();

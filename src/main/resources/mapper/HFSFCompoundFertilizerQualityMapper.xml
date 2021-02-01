@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gs.dao.mapper.HFSFCompoundFertilizerQualityMapper">
+
+    <select id="hFSFCompoundFertilizerQualityStatic"
+            resultType="com.gs.VO.HFSFCompoundFertilizerQualityStaticVO">
+            SELECT
+                t1.* ,
+                round( ( t1."totalFirstClass" / t1."totalYeild" * 100 ), 2 ) AS "totalFirstClassRate",
+                round( ( t1."totalYeild" - t1."totalUnqualified" ) / t1."totalYeild" * 100, 2 ) AS "totalQualifiedRate"
+            FROM
+                (
+                SELECT
+                    t1.*,
+                    round( ( t1."totalAFirstClass" / t1."aTotalYeild" * 100 ), 2 ) AS "aFirstClassRate",
+                    round( ( t1."totalBFirstClass" / t1."bTotalYeild" * 100 ), 2 ) AS "bFirstClassRate",
+                    round( ( t1."totalCFirstClass" / t1."cTotalYeild" * 100 ), 2 ) AS "cFirstClassRate",
+                    round( ( t1."totalDFirstClass" / t1."dTotalYeild" * 100 ), 2 ) AS "dFirstClassRate",
+                    ( t1."totalAFirstClass" + t1."totalBFirstClass" + t1."totalCFirstClass" + t1."totalDFirstClass" ) AS "totalFirstClass",
+                    ( t1."totalAOwnUsePackage" + t1."totalBOwnUsePackage" + t1."totalBOwnUsePackage" + t1."totalBOwnUsePackage" ) AS "totalOwnUsePackage",
+                    ( t1."totalAOverNutrition" + t1."totalBOverNutrition" + t1."totalBOverNutrition" + t1."totalBOverNutrition" ) AS "totalOverNutrition",
+                    ( t1."totalAUnqualified" + t1."totalBUnqualified" + t1."totalCUnqualified" + t1."totalDUnqualified" ) AS "totalUnqualified",
+                    ( t1."aTotalYeild" + t1."bTotalYeild" + t1."cTotalYeild" + t1."dTotalYeild" ) AS "totalYeild"
+                FROM
+                    (
+                    SELECT SUM
+                        ( a_first_class ) AS "totalAFirstClass",
+                        SUM ( a_own_use_package ) AS "totalAOwnUsePackage",
+                        SUM ( a_over_nutrition ) AS "totalAOverNutrition",
+                        SUM ( a_unqualified ) AS "totalAUnqualified",
+                        ( SUM ( a_first_class ) + SUM ( a_own_use_package ) + SUM ( a_over_nutrition ) + SUM ( a_unqualified ) ) AS "aTotalYeild",
+                        SUM ( b_first_class ) AS "totalBFirstClass",
+                        SUM ( b_own_use_package ) AS "totalBOwnUsePackage",
+                        SUM ( b_over_nutrition ) AS "totalBOverNutrition",
+                        SUM ( b_unqualified ) AS "totalBUnqualified",
+                        ( SUM ( b_first_class ) + SUM ( b_own_use_package ) + SUM ( b_over_nutrition ) + SUM ( b_unqualified ) ) AS "bTotalYeild",
+                        SUM ( c_first_class ) AS "totalCFirstClass",
+                        SUM ( c_own_use_package ) AS "totalCOwnUsePackage",
+                        SUM ( c_over_nutrition ) AS "totalCOverNutrition",
+                        SUM ( c_unqualified ) AS "totalCUnqualified",
+                        ( SUM ( c_first_class ) + SUM ( c_own_use_package ) + SUM ( c_over_nutrition ) + SUM ( c_unqualified ) ) AS "cTotalYeild",
+                        SUM ( d_first_class ) AS "totalDFirstClass",
+                        SUM ( d_own_use_package ) AS "totalDOwnUsePackage",
+                        SUM ( d_over_nutrition ) AS "totalDOverNutrition",
+                        SUM ( d_unqualified ) AS "totalDUnqualified",
+                        ( SUM ( d_first_class ) + SUM ( d_own_use_package ) + SUM ( d_over_nutrition ) + SUM ( d_unqualified ) ) AS "dTotalYeild"
+                    FROM
+                        hfsf_compound_fertilizer_quality
+                    where
+                        date between #{startDate} and #{endDate}
+                    ) t1
+                ) t1
+    </select>
+</mapper>
