@@ -15,4 +15,9 @@ public class Constant {
 
     //item均值前缀
     public static final String REDIS_ITEM_AVG_CACHE_PREFIX = "GS:ITEM_AVG_CACHE:";
+
+    //计算脚本函数MEAN_BY_TIME正则
+    public static final String SCRIPT_FUNCTION_RE_MEAN_BY_TIME = "MEAN_BY_TIME\\[(.*?)\\]";
+
+
 }

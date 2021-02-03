@@ -49,6 +49,7 @@ public class TwinPointServiceImpl extends ServiceImpl<TwinPointMapper, TwinPoint
 
     @Override
     public List<TwinPointEntity> twinPointForUpdateValue() {
+        //脚本类型
         List<TwinPointEntity> twinPointEntities = twinPointMapper.twinPointForUpdateValue();
         return twinPointEntities;
     }

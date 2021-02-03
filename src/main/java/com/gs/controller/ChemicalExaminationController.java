@@ -7,6 +7,7 @@ import com.gs.DTO.HFSFCompoundFertilizerQualityDTO;
 import com.gs.VO.CommomResponse;
 import com.gs.VO.HFSFCompoundFertilizerQualityStaticVO;
 import com.gs.dao.entity.HFSFCompoundFertilizerQualityEntity;
+import com.gs.service.ChemicalExaminationRecordService;
 import com.gs.service.HFSFCompoundFertilizerQualityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -30,6 +31,9 @@ public class ChemicalExaminationController {
 
     @Autowired
     HFSFCompoundFertilizerQualityService hfsfCompoundFertilizerQualityService;
+
+    @Autowired
+    ChemicalExaminationRecordService chemicalExaminationRecordService;
 
     /**
      * 四方集团复合肥产品质量统计报表登记接口

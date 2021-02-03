@@ -209,6 +209,12 @@ public class HFSFCompoundFertilizerQualityEntity {
     @TableField("low_concentration")
     private Float lowConcentration = 0f;
 
+    /**
+     * 送检时间
+     */
+    @TableField("exam_time")
+    private LocalDateTime examTime;
+
     @TableField("create_time")
     private LocalDateTime createTime;
 

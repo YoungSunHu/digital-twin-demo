@@ -20,7 +20,17 @@ public class PatterTest {
 
     @Test
     public void rexTest() {
-        Pattern p = Pattern.compile("\\$\\{(.*?)\\}");
+        Pattern p = Pattern.compile("");
+        Matcher m = p.matcher("result=${_PublicGroup.fhf6.Balance_02_nFlux}+${_PublicGroup.fhf6.Balance_03_nFlux}");
+        while (m.find()) {
+            String group = m.group();
+            System.out.println(m.group().replace("${", "").replace("}", ""));
+        }
+    }
+
+    @Test
+    public void rexTest02() {
+        Pattern p = Pattern.compile("MEAN_BY_TIME\\{(.*?)\\}");
         Matcher m = p.matcher("result=${_PublicGroup.fhf6.Balance_02_nFlux}+${_PublicGroup.fhf6.Balance_03_nFlux}");
         while (m.find()) {
             String group = m.group();

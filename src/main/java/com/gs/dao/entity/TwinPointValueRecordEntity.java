@@ -58,6 +58,9 @@ public class TwinPointValueRecordEntity implements Serializable {
     @TableField("twin_point_value")
     private String twinPointValue;
 
+    @TableField("item_timestamp")
+    private LocalDateTime itemTimestamp;
+
     @TableField("create_time")
     private LocalDateTime createTime;
 

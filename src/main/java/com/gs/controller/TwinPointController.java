@@ -80,8 +80,6 @@ public class TwinPointController {
         int count = twinPointService.count(new QueryWrapper<TwinPointEntity>().eq("point_id", saveTwinPointDTO.getPointId()).eq("factory_id", saveTwinPointDTO.getFactoryId()));
         if (count > 0) {
             throw new BussinessException("点位" + saveTwinPointDTO.getPointId() + "已存在");
-        } else if (saveTwinPointDTO.getCalculateFrequency() >= saveTwinPointDTO.getCalculateCycle()) {
-            throw new BussinessException("计算周期必须大于计算频率");
         }
         TwinPointEntity twinPointEntity = new TwinPointEntity();
         Double aDouble = null;
@@ -103,7 +101,7 @@ public class TwinPointController {
             twinPointEntity.setPointValue(CollectionUtils.isEmpty(records) ? null : records.get(0).getItemValue());
         }
         //下次更新时间
-        twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateFrequency(), ChronoUnit.SECONDS));
+        twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
         //均值更新时间
         twinPointEntity.setAvgUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
         BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
@@ -119,9 +117,6 @@ public class TwinPointController {
      */
     @PostMapping("/saveOrUpdateTwinPoint")
     public CommomResponse saveOrUpdateTwinPoint(@RequestBody @Validated SaveTwinPointDTO saveTwinPointDTO) {
-        if (saveTwinPointDTO.getCalculateFrequency() >= saveTwinPointDTO.getCalculateCycle()) {
-            throw new BussinessException("计算周期必须大于计算频率");
-        }
         TwinPointEntity twinPointEntity = twinPointService.getOne(new QueryWrapper<TwinPointEntity>().eq("point_id", saveTwinPointDTO.getPointId()));
         if (twinPointEntity == null) {
             twinPointEntity = new TwinPointEntity();
@@ -147,7 +142,7 @@ public class TwinPointController {
         }
         BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
         //下次更新时间
-        twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateFrequency(), ChronoUnit.SECONDS));
+        twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
         //均值更新时间
         twinPointEntity.setAvgUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
         twinPointService.saveOrUpdate(twinPointEntity, new QueryWrapper<TwinPointEntity>().eq("point_id", saveTwinPointDTO.getPointId()).eq("factory_id", saveTwinPointDTO.getFactoryId()));

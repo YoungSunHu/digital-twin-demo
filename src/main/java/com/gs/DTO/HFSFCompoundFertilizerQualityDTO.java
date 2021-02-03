@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @author ：YoungSun
@@ -35,11 +36,13 @@ public class HFSFCompoundFertilizerQualityDTO {
     /**
      * 班次 1:甲 2:乙 3:丙 4:丁
      */
+    @NotNull(message = "shift不得为空")
     private Integer shift;
 
     /**
      * 0:白班 1:夜班
      */
+    @NotNull(message = "shiftType不得为空")
     private Integer shiftType;
 
     /**
@@ -192,4 +195,10 @@ public class HFSFCompoundFertilizerQualityDTO {
      * 低浓度
      */
     private Float lowConcentration = 0f;
+
+    /**
+     * 送检时间
+     */
+    @NotNull(message = "testTime不得为空")
+    private LocalDateTime testTime;
 }

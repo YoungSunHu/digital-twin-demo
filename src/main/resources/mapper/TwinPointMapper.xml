@@ -3,6 +3,6 @@
 
 <mapper namespace="com.gs.dao.mapper.TwinPointMapper">
     <select id="twinPointForUpdateValue" resultType="com.gs.dao.entity.TwinPointEntity">
-        select * from twin_point where next_update_time &lt;= now() and data_type in (1,2) order by calculate_sequence desc limit 20 OFFSET 0
+        select * from twin_point where next_update_time &lt;= now() and data_type in (2) order by calculate_sequence desc limit 20 OFFSET 0
     </select>
 </mapper>
