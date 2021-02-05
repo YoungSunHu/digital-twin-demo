@@ -60,4 +60,8 @@ public class HFSFCompoundFertilizerFormulaDetailDTO implements Serializable {
      * 原料成本
      */
     Float rawMaterialCost = 0f;
+    /**
+     * 化验编号
+     */
+    String examCode;
 }

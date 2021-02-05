@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
@@ -46,15 +47,20 @@ public class TwinPointValueRecordServiceImpl extends ServiceImpl<TwinPointValueR
             twinPointValueRecordEntity.setDataType(twinPointEntity.getDataType());
             twinPointValueRecordEntity.setTwinPointId(twinPointEntity.getPointId());
             twinPointValueRecordEntity.setTwinPointName(twinPointEntity.getPointName());
-            twinPointValueRecordEntity.setTwinPointValue(entity.getItemValue());
             twinPointValueRecordEntity.setFactoryId(twinPointEntity.getFactoryId());
             twinPointValueRecordEntity.setTwinPointCode(twinPointEntity.getPointCode());
             twinPointValueRecordEntity.setPointId(twinPointEntity.getId());
             twinPointValueRecordEntity.setProductionLineId(twinPointEntity.getProductionLineId());
             twinPointValueRecordEntity.setItemTimestamp(Instant.ofEpochMilli(entity.getItemTimestamp().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime());
+            if (entity.getItemType() == 8) {
+                twinPointValueRecordEntity.setTwinPointValue(entity.getItemValue());
+                twinPointEntity.setPointValue(entity.getItemValue());
+            } else {
+                twinPointValueRecordEntity.setTwinPointValue(BigDecimal.valueOf(Double.valueOf(entity.getItemValue())).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_CEILING).toString());
+                twinPointEntity.setPointValue(BigDecimal.valueOf(Double.valueOf(entity.getItemValue())).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_CEILING).toString());
+            }
             twinPointValueRecordMapper.insert(twinPointValueRecordEntity);
             //更新孪生点位值
-            twinPointEntity.setPointValue(entity.getItemValue());
             twinPointMapper.updateById(twinPointEntity);
         }
     }

@@ -91,4 +91,27 @@ public class TwinPointEntity implements Serializable {
 
     @TableField("update_time")
     private LocalDateTime updateTime;
+
+    /**
+     * 关联化验项ID
+     */
+    @TableField("chemical_examination_id")
+    private Long chemicalExaminationId;
+
+    @TableField("exam_time")
+    private LocalDateTime examTime;
+
+    public TwinPointValueRecordEntity genRecordEntity() {
+        TwinPointValueRecordEntity twinPointValueRecordEntity = new TwinPointValueRecordEntity();
+        twinPointValueRecordEntity.setPointId(this.id);
+        twinPointValueRecordEntity.setTwinPointId(this.pointId);
+        twinPointValueRecordEntity.setProductionLineId(this.productionLineId);
+        twinPointValueRecordEntity.setTwinPointCode(this.pointCode);
+        twinPointValueRecordEntity.setDataType(this.dataType);
+        twinPointValueRecordEntity.setUnit(this.unit);
+        twinPointValueRecordEntity.setFactoryId(this.factoryId);
+        twinPointValueRecordEntity.setTwinPointValue(this.pointValue);
+        return twinPointValueRecordEntity;
+    }
+
 }

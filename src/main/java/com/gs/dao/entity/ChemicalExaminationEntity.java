@@ -18,13 +18,10 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName("chemical_examination_record")
-public class ChemicalExaminationRecordEntity {
+@TableName("chemical_examination")
+public class ChemicalExaminationEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
-    @TableField("chemical_examination_id")
-    private Long chemicalExaminationId;
 
     @TableField("factory_id")
     private String factoryId;

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -58,6 +59,9 @@ public class TwinPointController {
     @Autowired
     OPCItemAvgService opcItemAvgService;
 
+    @Autowired
+    ChemicalExaminationService chemicalExaminationService;
+
     /**
      * dcs点位列表
      *
@@ -85,26 +89,41 @@ public class TwinPointController {
         Double aDouble = null;
         if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isBlank(saveTwinPointDTO.getCalculateScript())) {
             throw new BussinessException("计算脚本不得为空");
+        } else if (saveTwinPointDTO.getDataType() == 1 && StringUtils.isBlank(saveTwinPointDTO.getItemId())) {
+            throw new BussinessException("DCS点位ID不得为空");
+        } else if (saveTwinPointDTO.getDataType() == 3 && saveTwinPointDTO.getChemicalExaminationId() == null) {
+            throw new BussinessException("化验项ID不得为空");
+        }
+        BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
+        if (saveTwinPointDTO.getDataType() == 1) {
+            //dcs点位
+            IPage<OPCItemValueRecordEntity> page = opcItemValueRecordService.page(new Page<OPCItemValueRecordEntity>(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", saveTwinPointDTO.getItemId()).eq("factory_id", saveTwinPointDTO.getFactoryId()).orderBy(true, false, "item_timestamp"));
+            List<OPCItemValueRecordEntity> records = page.getRecords();
+            if (CollectionUtils.isNotEmpty(records) && records.get(0).getItemType() != 8) {
+                twinPointEntity.setPointValue(String.valueOf(BigDecimal.valueOf(Double.valueOf(records.get(0).getItemValue())).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_HALF_UP)));
+            } else if (CollectionUtils.isNotEmpty(records)) {
+                twinPointEntity.setPointValue(page.getRecords().get(0).getItemValue());
+            }
         } else if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isNoneBlank(saveTwinPointDTO.getCalculateScript())) {
             //脚本校验
             CalculateScriptTestDTO calculateScriptTestDTO = new CalculateScriptTestDTO();
             calculateScriptTestDTO.setCalculateScript(saveTwinPointDTO.getCalculateScript());
             calculateScriptTestDTO.setFactoryId(saveTwinPointDTO.getFactoryId());
+            calculateScriptTestDTO.setProductionLineId(saveTwinPointDTO.getProductionLineId());
             aDouble = calculateScriptService.calculateScriptRun(calculateScriptTestDTO);
-            twinPointEntity.setPointValue(String.valueOf(aDouble));
-        } else if (saveTwinPointDTO.getDataType() == 1 && StringUtils.isBlank(saveTwinPointDTO.getItemId())) {
-            throw new BussinessException("DCS点位ID不得为空");
-        } else if (saveTwinPointDTO.getDataType() == 1) {
-            //dcs点位
-            IPage<OPCItemValueRecordEntity> page = opcItemValueRecordService.page(new Page<OPCItemValueRecordEntity>(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", saveTwinPointDTO.getItemId()).eq("factory_id", saveTwinPointDTO.getFactoryId()).orderBy(true, false, "item_timestamp"));
-            List<OPCItemValueRecordEntity> records = page.getRecords();
-            twinPointEntity.setPointValue(CollectionUtils.isEmpty(records) ? null : records.get(0).getItemValue());
+            twinPointEntity.setPointValue(String.valueOf(BigDecimal.valueOf(aDouble).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_DOWN)));
+            twinPointEntity.setItemId("");
+        } else if (saveTwinPointDTO.getDataType() == 3) {
+            //化验项
+            ChemicalExaminationEntity entity = chemicalExaminationService.getOne(new QueryWrapper<ChemicalExaminationEntity>().eq("id", saveTwinPointDTO.getChemicalExaminationId()));
+            twinPointEntity.setPointValue(String.valueOf(BigDecimal.valueOf(Double.valueOf(entity.getExamItemValue())).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_DOWN)));
+            twinPointEntity.setItemId("");
         }
         //下次更新时间
         twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
         //均值更新时间
         twinPointEntity.setAvgUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
-        BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
+        twinPointEntity.setPointValue(String.valueOf(aDouble));
         twinPointService.save(twinPointEntity);
         return CommomResponse.success("保存成功");
     }
@@ -124,6 +143,21 @@ public class TwinPointController {
         Double aDouble = null;
         if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isBlank(saveTwinPointDTO.getCalculateScript())) {
             throw new BussinessException("计算脚本不得为空");
+        } else if (saveTwinPointDTO.getDataType() == 1 && StringUtils.isBlank(saveTwinPointDTO.getItemId())) {
+            throw new BussinessException("DCS点位ID不得为空");
+        } else if (saveTwinPointDTO.getDataType() == 3 && saveTwinPointDTO.getChemicalExaminationId() == null) {
+            throw new BussinessException("化验项ID不得为空");
+        }
+        BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
+        if (saveTwinPointDTO.getDataType() == 1) {
+            //dcs点位
+            IPage<OPCItemValueRecordEntity> page = opcItemValueRecordService.page(new Page<OPCItemValueRecordEntity>(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", saveTwinPointDTO.getItemId()).eq("factory_id", saveTwinPointDTO.getFactoryId()).orderBy(true, false, "item_timestamp"));
+            List<OPCItemValueRecordEntity> records = page.getRecords();
+            if (CollectionUtils.isNotEmpty(records) && records.get(0).getItemType() != 8) {
+                twinPointEntity.setPointValue(String.valueOf(BigDecimal.valueOf(Double.valueOf(records.get(0).getItemValue())).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_HALF_UP)));
+            } else if (CollectionUtils.isNotEmpty(records)) {
+                twinPointEntity.setPointValue(page.getRecords().get(0).getItemValue());
+            }
         } else if (saveTwinPointDTO.getDataType() == 2 && StringUtils.isNoneBlank(saveTwinPointDTO.getCalculateScript())) {
             //脚本校验
             CalculateScriptTestDTO calculateScriptTestDTO = new CalculateScriptTestDTO();
@@ -131,16 +165,14 @@ public class TwinPointController {
             calculateScriptTestDTO.setFactoryId(saveTwinPointDTO.getFactoryId());
             calculateScriptTestDTO.setProductionLineId(saveTwinPointDTO.getProductionLineId());
             aDouble = calculateScriptService.calculateScriptRun(calculateScriptTestDTO);
-            twinPointEntity.setPointValue(String.valueOf(aDouble));
-        } else if (saveTwinPointDTO.getDataType() == 1 && StringUtils.isBlank(saveTwinPointDTO.getItemId())) {
-            throw new BussinessException("DCS点位ID不得为空");
-        } else if (saveTwinPointDTO.getDataType() == 1) {
-            //dcs点位
-            IPage<OPCItemValueRecordEntity> page = opcItemValueRecordService.page(new Page<OPCItemValueRecordEntity>(1, 1), new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id", saveTwinPointDTO.getItemId()).eq("factory_id", saveTwinPointDTO.getFactoryId()).orderBy(true, false, "item_timestamp"));
-            List<OPCItemValueRecordEntity> records = page.getRecords();
-            twinPointEntity.setPointValue(CollectionUtils.isEmpty(records) ? null : records.get(0).getItemValue());
+            twinPointEntity.setPointValue(String.valueOf(BigDecimal.valueOf(aDouble).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_DOWN)));
+            twinPointEntity.setItemId("");
+        } else if (saveTwinPointDTO.getDataType() == 3) {
+            //化验项
+            ChemicalExaminationEntity entity = chemicalExaminationService.getOne(new QueryWrapper<ChemicalExaminationEntity>().eq("id", saveTwinPointDTO.getChemicalExaminationId()));
+            twinPointEntity.setPointValue(String.valueOf(BigDecimal.valueOf(Double.valueOf(entity.getExamItemValue())).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_DOWN)));
+            twinPointEntity.setItemId("");
         }
-        BeanUtils.copyProperties(saveTwinPointDTO, twinPointEntity);
         //下次更新时间
         twinPointEntity.setNextUpdateTime(LocalDateTime.now().plus(saveTwinPointDTO.getCalculateCycle(), ChronoUnit.SECONDS));
         //均值更新时间

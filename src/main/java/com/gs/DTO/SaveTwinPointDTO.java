@@ -74,4 +74,10 @@ public class SaveTwinPointDTO implements Serializable {
 
     private String itemId;
 
+    /**
+     * 关联化验项ID
+     */
+    private Long chemicalExaminationId;
+
+
 }

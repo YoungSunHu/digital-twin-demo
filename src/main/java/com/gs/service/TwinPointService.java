@@ -3,6 +3,7 @@ package com.gs.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.gs.dao.entity.TwinPointEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -30,4 +31,13 @@ public interface TwinPointService extends IService<TwinPointEntity> {
      * @param twinPointEntity
      */
     void twinPointCache(TwinPointEntity twinPointEntity);
+
+    /**
+     * 孪生点位化验数据更新
+     *
+     * @param chemicalItemId 化验项id
+     * @param itemValue      化验值
+     * @param examTime       化验时间
+     */
+    void chemicalExamUpdate(Long chemicalItemId, String itemValue, LocalDateTime examTime);
 }
