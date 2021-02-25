@@ -21,4 +21,5 @@ public class ChemicalExaminationItemListDTO {
     private String factoryId;
     @NotBlank(message = "productionLineId不得为空")
     private String productionLineId;
+
 }

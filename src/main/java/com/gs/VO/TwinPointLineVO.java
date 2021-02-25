@@ -1,5 +1,7 @@
 package com.gs.VO;
 
+import com.gs.dao.entity.TwinPointEntity;
+import com.gs.dao.entity.TwinPointValueRecordEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,5 +18,5 @@ import java.util.List;
 @NoArgsConstructor
 public class TwinPointLineVO {
     String twinPointId;
-    List twinPointList;
+    List<TwinPointValueRecordEntity> twinPointList;
 }

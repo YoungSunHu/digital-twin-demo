@@ -10,6 +10,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author ：YoungSun
@@ -37,4 +38,9 @@ public class ItemLineDTO implements Serializable {
      * 点位间隔,颗粒度
      */
     private Integer pointStep = 10;
+
+    /**
+     * 查询时间点
+     */
+    private List<LocalDateTime> searchTimePoints;
 }

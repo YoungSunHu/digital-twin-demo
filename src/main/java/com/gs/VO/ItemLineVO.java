@@ -1,5 +1,8 @@
 package com.gs.VO;
 
+import com.gs.dao.entity.OPCItemEntity;
+import com.gs.dao.entity.OPCItemValueRecordEntity;
+import com.gs.dao.entity.TwinPointAvgEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,5 +19,5 @@ import java.util.List;
 @NoArgsConstructor
 public class ItemLineVO {
     String itemId;
-    List itemList;
+    List<OPCItemValueRecordEntity> itemList;
 }

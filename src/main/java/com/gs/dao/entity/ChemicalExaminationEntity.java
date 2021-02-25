@@ -29,6 +29,9 @@ public class ChemicalExaminationEntity {
     @TableField("production_line_id")
     private String productionLineId;
 
+    @TableField("production_line_code")
+    private String productionLineCode;
+
     @TableField("exam_code")
     private String examCode;
 

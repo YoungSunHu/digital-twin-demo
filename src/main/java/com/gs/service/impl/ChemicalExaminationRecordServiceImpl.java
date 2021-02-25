@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
     @Override
     public void HFSFLine6(HFSFCompoundFertilizerQualityEntity entity) {
         //养分N
-        QueryWrapper<ChemicalExaminationEntity> nWrapper = new QueryWrapper<ChemicalExaminationEntity>().eq("exam_code", "fhf6_cfq_1_1").eq("factory_id", "AHHSF001").eq("production_line_id", "fhf6");
+        QueryWrapper<ChemicalExaminationEntity> nWrapper = new QueryWrapper<ChemicalExaminationEntity>().eq("exam_code", "fhf6_cfq_1_1").eq("factory_id", "AHHSF001").eq("production_line_code", "fhf6");
         ChemicalExaminationEntity nEntity = chemicalExaminationMapper.selectOne(nWrapper);
         ChemicalExaminationRecordEntity nRecordEntity = new ChemicalExaminationRecordEntity();
         BeanUtils.copyProperties(nEntity, nRecordEntity);
@@ -52,7 +53,7 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
         twinPointService.chemicalExamUpdate(nEntity.getId(), nEntity.getExamItemValue(), nEntity.getExamTime());
 
         //养分P
-        QueryWrapper<ChemicalExaminationEntity> pWrapper = new QueryWrapper<ChemicalExaminationEntity>().eq("exam_code", "fhf6_cfq_2_1").eq("factory_id", "AHHSF001").eq("production_line_id", "fhf6");
+        QueryWrapper<ChemicalExaminationEntity> pWrapper = new QueryWrapper<ChemicalExaminationEntity>().eq("exam_code", "fhf6_cfq_2_1").eq("factory_id", "AHHSF001").eq("production_line_code", "fhf6");
         ChemicalExaminationEntity pEntity = chemicalExaminationMapper.selectOne(pWrapper);
         ChemicalExaminationRecordEntity pRecordEntity = new ChemicalExaminationRecordEntity();
         BeanUtils.copyProperties(pEntity, pRecordEntity);
@@ -66,7 +67,7 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
         twinPointService.chemicalExamUpdate(pEntity.getId(), pEntity.getExamItemValue(), pEntity.getExamTime());
 
         //养分P
-        QueryWrapper<ChemicalExaminationEntity> kWrapper = new QueryWrapper<ChemicalExaminationEntity>().eq("exam_code", "fhf6_cfq_3_1").eq("factory_id", "AHHSF001").eq("production_line_id", "fhf6");
+        QueryWrapper<ChemicalExaminationEntity> kWrapper = new QueryWrapper<ChemicalExaminationEntity>().eq("exam_code", "fhf6_cfq_3_1").eq("factory_id", "AHHSF001").eq("production_line_code", "fhf6");
         ChemicalExaminationEntity kEntity = chemicalExaminationMapper.selectOne(pWrapper);
         ChemicalExaminationRecordEntity kRecordEntity = new ChemicalExaminationRecordEntity();
         BeanUtils.copyProperties(kEntity, kRecordEntity);
@@ -80,7 +81,7 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
         twinPointService.chemicalExamUpdate(kEntity.getId(), kEntity.getExamItemValue(), kEntity.getExamTime());
 
         //水分
-        QueryWrapper<ChemicalExaminationEntity> waterWrapper = new QueryWrapper<ChemicalExaminationEntity>().eq("exam_code", "fhf6_cfq_4_1").eq("factory_id", "AHHSF001").eq("production_line_id", "fhf6");
+        QueryWrapper<ChemicalExaminationEntity> waterWrapper = new QueryWrapper<ChemicalExaminationEntity>().eq("exam_code", "fhf6_cfq_4_1").eq("factory_id", "AHHSF001").eq("production_line_code", "fhf6");
         ChemicalExaminationEntity waterEntity = chemicalExaminationMapper.selectOne(waterWrapper);
         ChemicalExaminationRecordEntity waterRecordEntity = new ChemicalExaminationRecordEntity();
         BeanUtils.copyProperties(waterEntity, waterRecordEntity);
@@ -98,7 +99,7 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
     public void HFSFLine6(HFSFCompoundFertilizerFormulaDTO dto) {
         for (HFSFCompoundFertilizerFormulaDetailDTO detail : dto.getDetails()) {
             if (StringUtils.isNoneBlank(detail.getExamCode())) {
-                QueryWrapper<ChemicalExaminationEntity> queryWrapper = new QueryWrapper<ChemicalExaminationEntity>().like("exam_code", detail.getExamCode()).eq("factory_id", "AHHSF001").eq("production_line_id", "fhf6");
+                QueryWrapper<ChemicalExaminationEntity> queryWrapper = new QueryWrapper<ChemicalExaminationEntity>().like("exam_code", detail.getExamCode()).eq("factory_id", "AHHSF001").eq("production_line_code", "fhf6");
                 List<ChemicalExaminationEntity> examinationEntities = chemicalExaminationMapper.selectList(queryWrapper);
                 for (ChemicalExaminationEntity examinationEntity : examinationEntities) {
                     if (examinationEntity.getExamCode().equals(detail.getExamCode() + "_1")) {
@@ -112,6 +113,7 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
                         examinationEntity.setExamItemValue(String.valueOf(detail.getNutrientContent()));
                         examinationEntity.setExamTime(dto.getFormualDate());
                         chemicalExaminationMapper.updateById(examinationEntity);
+                        chemicalExaminationRecordEntity.setCreateTime(LocalDateTime.now());
                         chemicalExaminationRecordMapper.insert(chemicalExaminationRecordEntity);
                         twinPointService.chemicalExamUpdate(examinationEntity.getId(), examinationEntity.getExamItemValue(), examinationEntity.getExamTime());
                     } else if (examinationEntity.getExamCode().equals(detail.getExamCode() + "_2")) {
@@ -125,6 +127,7 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
                         examinationEntity.setExamItemValue(String.valueOf(detail.getWaterContent()));
                         examinationEntity.setExamTime(dto.getFormualDate());
                         chemicalExaminationMapper.updateById(examinationEntity);
+                        chemicalExaminationRecordEntity.setCreateTime(LocalDateTime.now());
                         chemicalExaminationRecordMapper.insert(chemicalExaminationRecordEntity);
                         twinPointService.chemicalExamUpdate(examinationEntity.getId(), examinationEntity.getExamItemValue(), examinationEntity.getExamTime());
                     } else if (examinationEntity.getExamCode().equals(detail.getExamCode() + "_3")) {
@@ -138,6 +141,7 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
                         examinationEntity.setExamItemValue(String.valueOf(detail.getMaterialWeight()));
                         examinationEntity.setExamTime(dto.getFormualDate());
                         chemicalExaminationMapper.updateById(examinationEntity);
+                        chemicalExaminationRecordEntity.setCreateTime(LocalDateTime.now());
                         chemicalExaminationRecordMapper.insert(chemicalExaminationRecordEntity);
                         twinPointService.chemicalExamUpdate(examinationEntity.getId(), examinationEntity.getExamItemValue(), examinationEntity.getExamTime());
                     }

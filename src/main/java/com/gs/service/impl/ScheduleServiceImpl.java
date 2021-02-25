@@ -1,12 +1,12 @@
 package com.gs.service.impl;
 
-import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.gs.dao.entity.OPCItemEntity;
 import com.gs.dao.entity.TwinPointEntity;
 import com.gs.dao.entity.TwinPointValueRecordEntity;
 import com.gs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +35,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Scheduled(cron = "*/1 * * * * ?")
+    @Async
     public void twinPointUpdate() {
         //需要更新的点位 一次处理20个
         List<TwinPointEntity> twinPointEntities = twinPointService.twinPointForUpdateValue();
@@ -60,6 +61,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Scheduled(cron = "*/1 * * * * ?")
+    @Async
     public void twinPointAverage() {
         //需要更新均值的孪生点位
         List<TwinPointEntity> list = twinPointService.list(new QueryWrapper<TwinPointEntity>().in("data_type", 1, 2).lt("avg_update_time", LocalDateTime.now()));
@@ -73,6 +75,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Scheduled(cron = "*/1 * * * * ?")
+    @Async
     public void itemAverage() {
         //需要统计均值的item
         List<OPCItemEntity> entities = opcItemService.list(new QueryWrapper<OPCItemEntity>().lt("avg_update_time", LocalDateTime.now()).in("item_type", 2, 3, 4));

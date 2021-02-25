@@ -11,14 +11,12 @@ import com.gs.DTO.CalculateScriptTestDTO;
 import com.gs.config.Constant;
 import com.gs.dao.entity.OPCItemValueRecordEntity;
 import com.gs.dao.entity.TwinPointEntity;
-import com.gs.dao.entity.TwinPointValueRecordEntity;
 import com.gs.dao.mapper.TwinPointMapper;
 import com.gs.exception.BussinessException;
 import com.gs.service.CalculateScriptService;
 import com.gs.service.OPCItemValueRecordService;
 import com.gs.service.TwinPointService;
 import com.gs.service.TwinPointValueRecordService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -77,7 +75,7 @@ public class TwinPointServiceImpl extends ServiceImpl<TwinPointMapper, TwinPoint
             aDouble = b.setScale(pointEntity.getDecimalPalces(), BigDecimal.ROUND_HALF_UP).doubleValue();
             pointEntity.setPointValue(String.valueOf(aDouble));
             //更新下次更新时间
-            pointEntity.setNextUpdateTime(LocalDateTime.now().plus(pointEntity.getCalculateFrequency(), ChronoUnit.SECONDS));
+            pointEntity.setNextUpdateTime(LocalDateTime.now().plus(pointEntity.getCalculateCycle(), ChronoUnit.SECONDS));
             //更新redis缓存
             twinPointMapper.updateById(pointEntity);
             //孪生点位缓存
@@ -88,7 +86,7 @@ public class TwinPointServiceImpl extends ServiceImpl<TwinPointMapper, TwinPoint
             if (CollectionUtils.isNotEmpty(records)) {
                 pointEntity.setPointValue(records.get(0).getItemValue());
                 //更新下次更新时间
-                pointEntity.setNextUpdateTime(LocalDateTime.now().plus(pointEntity.getCalculateFrequency(), ChronoUnit.SECONDS));
+                pointEntity.setNextUpdateTime(LocalDateTime.now().plus(pointEntity.getCalculateCycle(), ChronoUnit.SECONDS));
                 twinPointMapper.updateById(pointEntity);
                 this.twinPointCache(pointEntity);
             }

@@ -40,4 +40,5 @@ public interface TwinPointService extends IService<TwinPointEntity> {
      * @param examTime       化验时间
      */
     void chemicalExamUpdate(Long chemicalItemId, String itemValue, LocalDateTime examTime);
+
 }

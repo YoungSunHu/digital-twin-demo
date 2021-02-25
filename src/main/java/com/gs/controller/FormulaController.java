@@ -11,7 +11,6 @@ import com.gs.DTO.HFSFCompoundFertilizerFormulaListDTO;
 import com.gs.VO.CommomResponse;
 import com.gs.dao.entity.FormulaEntity;
 import com.gs.dao.entity.ParamConfigEntity;
-import com.gs.dao.mapper.ChemicalExaminationRecordMapper;
 import com.gs.dao.mapper.ParamConfigMapper;
 import com.gs.service.ChemicalExaminationRecordService;
 import com.gs.service.FormulaService;
@@ -49,6 +48,8 @@ public class FormulaController {
      */
     @PostMapping("/HFSF" + "/CompoundFertilizerFormula" + "/save")
     public CommomResponse HFSFCompoundFertilizerFormula(@RequestBody HFSFCompoundFertilizerFormulaDTO dto) {
+/*        String s = JSON.toJSONString(dto);
+        System.out.println(s);*/
         //读取模板
         ParamConfigEntity paramConfigEntity = paramConfigMapper.selectOne(new QueryWrapper<ParamConfigEntity>().eq("param_type", "HFSF_FORMULA_MODEL").eq("param_key", "15-15-15"));
         HFSFCompoundFertilizerFormulaDTO model = JSONObject.parseObject(paramConfigEntity.getParamValue(), HFSFCompoundFertilizerFormulaDTO.class);
@@ -70,7 +71,7 @@ public class FormulaController {
 
     @PostMapping("/HFSF" + "/CompoundFertilizerFormula" + "/list")
     public CommomResponse HFSFCompoundFertilizerFormulaList(@RequestBody HFSFCompoundFertilizerFormulaListDTO dto) {
-        IPage<FormulaEntity> page = formulaService.page(new Page<FormulaEntity>(dto.getPageNum(), dto.getPageSize()), new QueryWrapper<FormulaEntity>().eq("factory_id", "AHHSF001").eq("formula_code", "15-15-15"));
+        IPage<FormulaEntity> page = formulaService.page(new Page<FormulaEntity>(dto.getPageNum(), dto.getPageSize()), new QueryWrapper<FormulaEntity>().eq("factory_id", "AHHSF001").eq("formula_code", "15-15-15").orderBy(true, false, "create_time"));
         page.getRecords().forEach(
                 i -> {
                     i.setFormulaJson(null);

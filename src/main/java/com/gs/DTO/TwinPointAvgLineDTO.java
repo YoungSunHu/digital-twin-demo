@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author ：YoungSun
@@ -22,12 +23,16 @@ public class TwinPointAvgLineDTO implements Serializable {
     private String twinPointId;
     private String twinPointCode;
     private String factoryId;
-    @JsonFormat(pattern = "yyyy-MM-DD HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startDate;
-    @JsonFormat(pattern = "yyyy-MM-DD HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endDate;
     /**
      * 取点数
      */
     private Integer pointStep = 10;
+    /**
+     * 查询时间点
+     */
+    private List<LocalDateTime> searchTimePoints;
 }

@@ -15,12 +15,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -170,7 +168,7 @@ public class TwinPointController {
         } else if (saveTwinPointDTO.getDataType() == 3) {
             //化验项
             ChemicalExaminationEntity entity = chemicalExaminationService.getOne(new QueryWrapper<ChemicalExaminationEntity>().eq("id", saveTwinPointDTO.getChemicalExaminationId()));
-            twinPointEntity.setPointValue(String.valueOf(BigDecimal.valueOf(Double.valueOf(entity.getExamItemValue())).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_DOWN)));
+            twinPointEntity.setPointValue(entity.getExamItemValue() == null ? null : String.valueOf(BigDecimal.valueOf(Double.valueOf(entity.getExamItemValue())).setScale(twinPointEntity.getDecimalPalces(), BigDecimal.ROUND_DOWN)));
             twinPointEntity.setItemId("");
         }
         //下次更新时间
@@ -206,6 +204,7 @@ public class TwinPointController {
     @PostMapping("/delTwinPoint")
     public CommomResponse delTwinPoint(@RequestBody DelTwinPointDTO delTwinPointDTO) {
         twinPointService.remove(new QueryWrapper<TwinPointEntity>().eq("point_id", delTwinPointDTO.getPointId()).eq("factory_id", delTwinPointDTO.getFactoryId()).eq(delTwinPointDTO.getId() != null, "id", delTwinPointDTO.getId()));
+        twinPointValueRecordService.remove(new QueryWrapper<TwinPointValueRecordEntity>().eq("point_id", delTwinPointDTO.getId()).eq("factory_id", delTwinPointDTO.getFactoryId()));
         return CommomResponse.success("success");
     }
 
@@ -270,15 +269,19 @@ public class TwinPointController {
     @PostMapping("/twinPointAvgLine")
     public CommomResponse twinPointAvgLine(@RequestBody TwinPointAvgLineDTO twinPointAvgLineDTO) {
         QueryWrapper<TwinPointAvgEntity> objectQueryWrapper = new QueryWrapper<TwinPointAvgEntity>()
+                .in("to_timestamp(to_char(\"create_time\",'yyyy-MM-dd hh24:mi:00'),'yyyy-MM-dd hh24:mi:00')", twinPointAvgLineDTO.getSearchTimePoints())
                 .eq("twin_point_id", twinPointAvgLineDTO.getTwinPointId())
                 .eq("factory_id", twinPointAvgLineDTO.getFactoryId())
-                .between("create_time", twinPointAvgLineDTO.getStartDate(), twinPointAvgLineDTO.getEndDate());
+                .between("create_time", twinPointAvgLineDTO.getStartDate(), twinPointAvgLineDTO.getEndDate())
+                .orderBy(true, true, "create_time");
+/*
         int count = twinPointAvgService.count(objectQueryWrapper);
         if (count == 0) {
             return CommomResponse.data("success", null);
         }
         int step = (count / twinPointAvgLineDTO.getPointStep()) > 0 ? (count / twinPointAvgLineDTO.getPointStep()) : 1;
         objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "create_time");
+*/
 
         List<TwinPointAvgEntity> list = twinPointAvgService.list(objectQueryWrapper);
         return CommomResponse.data("success", list);
@@ -292,18 +295,41 @@ public class TwinPointController {
      */
     @PostMapping("/twinPointLine")
     public CommomResponse twinPointLine(@RequestBody TwinPointLineDTO twinPointLineDTO) {
-        QueryWrapper<TwinPointValueRecordEntity> objectQueryWrapper = new QueryWrapper<TwinPointValueRecordEntity>()
-                .eq("twin_point_id", twinPointLineDTO.getTwinPointId())
-                .eq("factory_id", twinPointLineDTO.getFactoryId())
-                .between("create_time", twinPointLineDTO.getStartDate(), twinPointLineDTO.getEndDate());
-        int count = twinPointValueRecordService.count(objectQueryWrapper);
-        if (count == 0) {
-            return CommomResponse.data("success", null);
+        QueryWrapper<TwinPointValueRecordEntity> objectQueryWrapper = null;
+        TwinPointEntity one = twinPointService.getOne(new QueryWrapper<TwinPointEntity>().eq("factory_id", twinPointLineDTO.getFactoryId()).eq("point_id", twinPointLineDTO.getTwinPointId()));
+        if (one.getDataType() == 1) {
+            objectQueryWrapper = new QueryWrapper<TwinPointValueRecordEntity>()
+                    .in("to_timestamp(to_char(\"item_timestamp\",'yyyy-MM-dd hh24:mi:00'),'yyyy-MM-dd hh24:mi:00')", twinPointLineDTO.getSearchTimePoints())
+                    .eq("twin_point_id", twinPointLineDTO.getTwinPointId())
+                    .eq("factory_id", twinPointLineDTO.getFactoryId())
+                    .between("create_time", twinPointLineDTO.getStartDate(), twinPointLineDTO.getEndDate())
+                    .orderBy(true, true, "item_timestamp");
+            List<TwinPointValueRecordEntity> list = twinPointValueRecordService.list(objectQueryWrapper);
+            list.forEach(
+                    i -> {
+                        i.setCreateTime(i.getItemTimestamp());
+                    }
+            );
+            return CommomResponse.data("success", list);
+        } else {
+            objectQueryWrapper = new QueryWrapper<TwinPointValueRecordEntity>()
+                    .eq("twin_point_id", twinPointLineDTO.getTwinPointId())
+                    .eq("factory_id", twinPointLineDTO.getFactoryId())
+                    .between("create_time", twinPointLineDTO.getStartDate(), twinPointLineDTO.getEndDate())
+            ;
+            int count = twinPointValueRecordService.count(objectQueryWrapper);
+            int step = (count / twinPointLineDTO.getPointStep()) > 0 ? (count / twinPointLineDTO.getPointStep()) : 1;
+            objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0);
+            if (count == 0) {
+                return CommomResponse.data("success", null);
+            }
+            objectQueryWrapper.orderBy(true, true, "create_time");
+            List<TwinPointValueRecordEntity> list = twinPointValueRecordService.list(objectQueryWrapper);
+
+            return CommomResponse.data("success", list);
         }
-        int step = (count / twinPointLineDTO.getPointStep()) > 0 ? (count / twinPointLineDTO.getPointStep()) : 1;
-        objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "create_time");
-        List<TwinPointValueRecordEntity> list = twinPointValueRecordService.list(objectQueryWrapper);
-        return CommomResponse.data("success", list);
+
+
     }
 
     /**
@@ -315,14 +341,16 @@ public class TwinPointController {
     @PostMapping("/itemLine")
     public CommomResponse itemLine(@RequestBody ItemLineDTO itemLineDTO) {
         QueryWrapper<OPCItemValueRecordEntity> objectQueryWrapper = new QueryWrapper<OPCItemValueRecordEntity>()
+                .in("to_timestamp(to_char(\"item_timestamp\",'yyyy-MM-dd hh24:mi:00'),'yyyy-MM-dd hh24:mi:00')", itemLineDTO.getSearchTimePoints())
                 .eq("item_id", itemLineDTO.getItemId())
-                .between("create_time", itemLineDTO.getStartDate(), itemLineDTO.getEndDate());
-        int count = opcItemValueRecordService.count(objectQueryWrapper);
+                .between("create_time", itemLineDTO.getStartDate(), itemLineDTO.getEndDate())
+                .orderBy(true, true, "create_time");
+        /*int count = opcItemValueRecordService.count(objectQueryWrapper);
         if (count == 0) {
             return CommomResponse.data("success", null);
         }
         int step = (count / itemLineDTO.getPointStep()) > 0 ? (count / itemLineDTO.getPointStep()) : 1;
-        objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "item_timestamp");
+        objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "item_timestamp");*/
         List<OPCItemValueRecordEntity> list = opcItemValueRecordService.list(objectQueryWrapper);
         return CommomResponse.data("success", list);
     }
@@ -336,14 +364,16 @@ public class TwinPointController {
     @PostMapping("/itemAvgLine")
     public CommomResponse itemAvgLine(@RequestBody ItemLineDTO itemLineDTO) {
         QueryWrapper<OPCItemAvgEntity> objectQueryWrapper = new QueryWrapper<OPCItemAvgEntity>()
+                .in("to_timestamp(to_char(\"item_timestamp\",'yyyy-MM-dd hh24:mi:00'),'yyyy-MM-dd hh24:mi:00')", itemLineDTO.getSearchTimePoints())
                 .eq("item_id", itemLineDTO.getItemId())
-                .between("create_time", itemLineDTO.getStartDate(), itemLineDTO.getEndDate());
-        int count = opcItemAvgService.count(objectQueryWrapper);
+                .between("create_time", itemLineDTO.getStartDate(), itemLineDTO.getEndDate())
+                .orderBy(true, true, "create_time");
+        /*int count = opcItemAvgService.count(objectQueryWrapper);
         if (count == 0) {
             return CommomResponse.data("success", null);
         }
         int step = (count / itemLineDTO.getPointStep()) > 0 ? (count / itemLineDTO.getPointStep()) : 1;
-        objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "create_time");
+        objectQueryWrapper = objectQueryWrapper.eq("id%" + step, 0).orderBy(true, true, "create_time");*/
         List<OPCItemAvgEntity> list = opcItemAvgService.list(objectQueryWrapper);
         return CommomResponse.data("success", list);
     }
@@ -355,13 +385,22 @@ public class TwinPointController {
      * @return
      */
     @PostMapping("/compoundLine")
+    @CrossOrigin
     public CommomResponse compoundLine(@RequestBody CompoundLineDTO compoundLineDTO) {
         CompoundLineVO compoundLineVO = new CompoundLineVO();
         List<TwinPointLineVO> twinPointLineVOS = new ArrayList<>();
         List<TwinPointAvgLineVO> twinPointAvgLineVO = new ArrayList<>();
         List<ItemLineVO> itemLineVOS = new ArrayList<>();
         List<ItemAvgLineVO> itemAvgLineVOS = new ArrayList<>();
-
+        //计算间隔步=s
+        Long step = Duration.between(compoundLineDTO.getStartDate(), compoundLineDTO.getEndDate()).toMinutes() / compoundLineDTO.getPointStep().longValue();
+        List<LocalDateTime> searchTimePoints = new ArrayList<>();
+        for (long i = 0; i < step; i++) {
+            LocalDateTime localDateTime = compoundLineDTO.getStartDate().plus(i * compoundLineDTO.getPointStep(), ChronoUnit.MINUTES);
+            localDateTime.withSecond(0);
+            searchTimePoints.add(localDateTime);
+        }
+        compoundLineDTO.setPointStep(step.intValue());
         if (CollectionUtils.isNotEmpty(compoundLineDTO.getTwinPointIds())) {
             for (String s : compoundLineDTO.getTwinPointIds()) {
                 TwinPointLineDTO twinPointLineDTO = new TwinPointLineDTO();
@@ -371,6 +410,7 @@ public class TwinPointController {
                 twinPointLineDTO.setEndDate(compoundLineDTO.getEndDate());
                 twinPointLineDTO.setTwinPointId(s);
                 twinPointLineDTO.setPointStep(compoundLineDTO.getPointStep());
+                twinPointLineDTO.setSearchTimePoints(searchTimePoints);
                 CommomResponse commomResponse = this.twinPointLine(twinPointLineDTO);
                 TwinPointLineVO twinPointLineVO = new TwinPointLineVO();
                 twinPointLineVO.setTwinPointId(s);
@@ -386,6 +426,7 @@ public class TwinPointController {
                 twinPointAvgLineDTO.setStartDate(compoundLineDTO.getStartDate());
                 twinPointAvgLineDTO.setEndDate(compoundLineDTO.getEndDate());
                 twinPointAvgLineDTO.setTwinPointId(s);
+                twinPointAvgLineDTO.setSearchTimePoints(searchTimePoints);
                 twinPointAvgLineDTO.setPointStep(compoundLineDTO.getPointStep());
                 CommomResponse commomResponse = this.twinPointAvgLine(twinPointAvgLineDTO);
                 TwinPointAvgLineVO twinPointAvgLineVO1 = new TwinPointAvgLineVO();
@@ -402,6 +443,7 @@ public class TwinPointController {
                 itemLineDTO.setStartDate(compoundLineDTO.getStartDate());
                 itemLineDTO.setEndDate(compoundLineDTO.getEndDate());
                 itemLineDTO.setPointStep(compoundLineDTO.getPointStep());
+                itemLineDTO.setSearchTimePoints(searchTimePoints);
                 CommomResponse commomResponse = this.itemLine(itemLineDTO);
                 ItemLineVO itemLineVO = new ItemLineVO();
                 itemLineVO.setItemId(s);
@@ -417,6 +459,7 @@ public class TwinPointController {
                 itemLineDTO.setStartDate(compoundLineDTO.getStartDate());
                 itemLineDTO.setEndDate(compoundLineDTO.getEndDate());
                 itemLineDTO.setPointStep(compoundLineDTO.getPointStep());
+                itemLineDTO.setSearchTimePoints(searchTimePoints);
                 CommomResponse commomResponse = this.itemAvgLine(itemLineDTO);
                 ItemAvgLineVO itemAvgLineVO = new ItemAvgLineVO();
                 itemAvgLineVO.setItemId(s);
@@ -429,6 +472,21 @@ public class TwinPointController {
         compoundLineVO.setItemList(itemLineVOS);
         compoundLineVO.setItemAvgList(itemAvgLineVOS);
         return CommomResponse.data("success", compoundLineVO);
+    }
+
+    /**
+     * 开关调整重新计算
+     *
+     * @param dto
+     * @return
+     */
+    @PostMapping("/switchRecalculate")
+    public CommomResponse switchRecalculate(@RequestBody SwitchRecalculateDTO dto) {
+        List<TwinPointEntity> list = twinPointService.list(new QueryWrapper<TwinPointEntity>().eq("production_line_id", dto.getProductionLineId()).eq("factory_id", dto.getFactoryId()).in("point_id", dto.getTwinPointIds()));
+        for (TwinPointEntity twinPointEntity : list) {
+            twinPointService.pointValueUpdate(twinPointEntity.getId());
+        }
+        return CommomResponse.success("success");
     }
 
 }

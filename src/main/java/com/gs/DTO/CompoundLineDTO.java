@@ -40,7 +40,7 @@ public class CompoundLineDTO implements Serializable {
     private LocalDateTime endDate;
 
     /**
-     * 取点数
+     * 时间间隔 默认10分钟 前端传的是分钟间隔
      */
     private Integer pointStep = 10;
 }

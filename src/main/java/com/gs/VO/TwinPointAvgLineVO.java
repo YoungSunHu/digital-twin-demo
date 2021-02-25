@@ -1,5 +1,6 @@
 package com.gs.VO;
 
+import com.gs.dao.entity.TwinPointAvgEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,5 +17,5 @@ import java.util.List;
 @NoArgsConstructor
 public class TwinPointAvgLineVO {
     String twinPointId;
-    List twinPointAvgList;
+    List<TwinPointAvgEntity> twinPointAvgList;
 }

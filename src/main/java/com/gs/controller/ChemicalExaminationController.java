@@ -2,7 +2,10 @@ package com.gs.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gs.DTO.ChemicalExaminationItemListDTO;
+import com.gs.DTO.CompoundFertilizerQualityListDTO;
 import com.gs.DTO.CompoundFertilizerQualityStaticDTO;
 import com.gs.DTO.HFSFCompoundFertilizerQualityDTO;
 import com.gs.VO.CommomResponse;
@@ -109,6 +112,15 @@ public class ChemicalExaminationController {
         //化验数据登记
         chemicalExaminationRecordService.HFSFLine6(hfsfCompoundFertilizerQualityEntity);
         return CommomResponse.success("success");
+    }
+
+    @PostMapping(value = "/HFSF" + "/CompoundFertilizerQuality" + "/list", produces = "application/json;charset=UTF-8")
+    public CommomResponse CompoundFertilizerQualityList(@RequestBody CompoundFertilizerQualityListDTO dto) {
+        QueryWrapper<HFSFCompoundFertilizerQualityEntity> wrapper = new QueryWrapper<HFSFCompoundFertilizerQualityEntity>()
+                .between("date", dto.getStartDate(), dto.getEndDate())
+                .orderBy(true, false, "date");
+        IPage<HFSFCompoundFertilizerQualityEntity> page = hfsfCompoundFertilizerQualityService.page(new Page<HFSFCompoundFertilizerQualityEntity>(dto.getPageNum(), dto.getPageSize()), wrapper);
+        return CommomResponse.data("success", page);
     }
 
     /**
