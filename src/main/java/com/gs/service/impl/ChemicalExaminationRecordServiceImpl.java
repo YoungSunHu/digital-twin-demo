@@ -108,10 +108,10 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
                         BeanUtils.copyProperties(examinationEntity, chemicalExaminationRecordEntity);
                         chemicalExaminationRecordEntity.setId(null);
                         chemicalExaminationRecordEntity.setExamItemValue(String.valueOf(detail.getNutrientContent()));
-                        chemicalExaminationRecordEntity.setExamTime(dto.getFormualDate());
+                        chemicalExaminationRecordEntity.setExamTime(dto.getFormulaDate().atTime(0, 0, 0));
                         chemicalExaminationRecordEntity.setChemicalExaminationId(examinationEntity.getId());
                         examinationEntity.setExamItemValue(String.valueOf(detail.getNutrientContent()));
-                        examinationEntity.setExamTime(dto.getFormualDate());
+                        examinationEntity.setExamTime(dto.getFormulaDate().atTime(0, 0, 0));
                         chemicalExaminationMapper.updateById(examinationEntity);
                         chemicalExaminationRecordEntity.setCreateTime(LocalDateTime.now());
                         chemicalExaminationRecordMapper.insert(chemicalExaminationRecordEntity);
@@ -122,10 +122,10 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
                         BeanUtils.copyProperties(examinationEntity, chemicalExaminationRecordEntity);
                         chemicalExaminationRecordEntity.setId(null);
                         chemicalExaminationRecordEntity.setExamItemValue(String.valueOf(detail.getWaterContent()));
-                        chemicalExaminationRecordEntity.setExamTime(dto.getFormualDate());
+                        chemicalExaminationRecordEntity.setExamTime(dto.getFormulaDate().atTime(0, 0, 0));
                         chemicalExaminationRecordEntity.setChemicalExaminationId(examinationEntity.getId());
                         examinationEntity.setExamItemValue(String.valueOf(detail.getWaterContent()));
-                        examinationEntity.setExamTime(dto.getFormualDate());
+                        examinationEntity.setExamTime(dto.getFormulaDate().atTime(0, 0, 0));
                         chemicalExaminationMapper.updateById(examinationEntity);
                         chemicalExaminationRecordEntity.setCreateTime(LocalDateTime.now());
                         chemicalExaminationRecordMapper.insert(chemicalExaminationRecordEntity);
@@ -136,10 +136,10 @@ public class ChemicalExaminationRecordServiceImpl extends ServiceImpl<ChemicalEx
                         BeanUtils.copyProperties(examinationEntity, chemicalExaminationRecordEntity);
                         chemicalExaminationRecordEntity.setId(null);
                         chemicalExaminationRecordEntity.setExamItemValue(String.valueOf(detail.getMaterialWeight()));
-                        chemicalExaminationRecordEntity.setExamTime(dto.getFormualDate());
+                        chemicalExaminationRecordEntity.setExamTime(dto.getFormulaDate().atTime(0, 0, 0));
                         chemicalExaminationRecordEntity.setChemicalExaminationId(examinationEntity.getId());
                         examinationEntity.setExamItemValue(String.valueOf(detail.getMaterialWeight()));
-                        examinationEntity.setExamTime(dto.getFormualDate());
+                        examinationEntity.setExamTime(dto.getFormulaDate().atTime(0, 0, 0));
                         chemicalExaminationMapper.updateById(examinationEntity);
                         chemicalExaminationRecordEntity.setCreateTime(LocalDateTime.now());
                         chemicalExaminationRecordMapper.insert(chemicalExaminationRecordEntity);

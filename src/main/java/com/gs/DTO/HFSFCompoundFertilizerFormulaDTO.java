@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,6 +21,10 @@ import java.util.List;
 @NoArgsConstructor
 @Validated
 public class HFSFCompoundFertilizerFormulaDTO implements Serializable {
+    /**
+     * 配方ID
+     */
+    Long id;
     /**
      * 受方单位
      */
@@ -48,8 +53,8 @@ public class HFSFCompoundFertilizerFormulaDTO implements Serializable {
     /**
      * 配方日期
      */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime formualDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    LocalDate formulaDate;
 
     /**
      * 配方详情

@@ -19,6 +19,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 /**
  * @author ：YoungSun
  * @date ：Created in 2021/1/27 14:39
@@ -62,8 +64,10 @@ public class FormulaController {
         formulaEntity.setFormulaName("尿基复合肥(45%)");
         formulaEntity.setFormulaModel("15-15-15（含氯）");
         formulaEntity.setFormulaCode("15-15-15");
+        formulaEntity.setFormulaDate(hfsfCompoundFertilizerFormulaDTO.getFormulaDate());
+        formulaEntity.setId(dto.getId());
         //储存配方
-        formulaService.save(formulaEntity);
+        formulaService.saveOrUpdate(formulaEntity);
         //提交配方化验数据
         chemicalExaminationRecordService.HFSFLine6(model);
         return CommomResponse.data("success", hfsfCompoundFertilizerFormulaDTO);
@@ -71,7 +75,7 @@ public class FormulaController {
 
     @PostMapping("/HFSF" + "/CompoundFertilizerFormula" + "/list")
     public CommomResponse HFSFCompoundFertilizerFormulaList(@RequestBody HFSFCompoundFertilizerFormulaListDTO dto) {
-        IPage<FormulaEntity> page = formulaService.page(new Page<FormulaEntity>(dto.getPageNum(), dto.getPageSize()), new QueryWrapper<FormulaEntity>().eq("factory_id", "AHHSF001").eq("formula_code", "15-15-15").orderBy(true, false, "create_time"));
+        IPage<FormulaEntity> page = formulaService.page(new Page<FormulaEntity>(dto.getPageNum(), dto.getPageSize()), new QueryWrapper<FormulaEntity>().between("formula_date", dto.getStartDate(), dto.getEndDate()).eq("factory_id", "AHHSF001").eq("formula_code", "15-15-15").orderBy(true, false, "formula_code"));
         page.getRecords().forEach(
                 i -> {
                     i.setFormulaJson(null);
@@ -98,6 +102,7 @@ public class FormulaController {
         ParamConfigEntity paramConfigEntity = paramConfigMapper.selectOne(new QueryWrapper<ParamConfigEntity>().eq("param_type", "HFSF_FORMULA_MODEL").eq("param_key", "15-15-15"));
         HFSFCompoundFertilizerFormulaDTO model = JSONObject.parseObject(paramConfigEntity.getParamValue(), HFSFCompoundFertilizerFormulaDTO.class);
         String s = JSON.toJSONString(model);
+        model.setFormulaDate(LocalDate.now());
         return CommomResponse.data("success", model);
     }
 

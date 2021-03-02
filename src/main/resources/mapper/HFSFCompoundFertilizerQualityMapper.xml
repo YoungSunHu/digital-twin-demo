@@ -82,8 +82,9 @@
                 FROM
                     hfsf_compound_fertilizer_quality
                 WHERE
-                    DATE BETWEEN '2021-02-19'
-                    AND '2021-02-19'
+                    del_flag =0
+                    AND DATE BETWEEN #{startDate}
+                    AND #{endDate}
                 ) t1
             ) t1
     </select>

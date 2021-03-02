@@ -2,12 +2,10 @@ package com.gs.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.gs.DTO.ChemicalExaminationItemListDTO;
-import com.gs.DTO.CompoundFertilizerQualityListDTO;
-import com.gs.DTO.CompoundFertilizerQualityStaticDTO;
-import com.gs.DTO.HFSFCompoundFertilizerQualityDTO;
+import com.gs.DTO.*;
 import com.gs.VO.CommomResponse;
 import com.gs.VO.HFSFCompoundFertilizerQualityStaticVO;
 import com.gs.dao.entity.ChemicalExaminationEntity;
@@ -106,7 +104,7 @@ public class ChemicalExaminationController {
         //中浓度
         hfsfCompoundFertilizerQualityEntity.setLowConcentration((hfsfCompoundFertilizerQualityEntity.getTotalNutrition() > 30 && hfsfCompoundFertilizerQualityEntity.getTotalNutrition() < 40) ? hfsfCompoundFertilizerQualityEntity.getShiftYeild() : 0f);
 
-        hfsfCompoundFertilizerQualityService.remove(new QueryWrapper<HFSFCompoundFertilizerQualityEntity>().eq("date", hfsfCompoundFertilizerQualityEntity.getDate()));
+        //hfsfCompoundFertilizerQualityService.remove(new QueryWrapper<HFSFCompoundFertilizerQualityEntity>().eq("date", hfsfCompoundFertilizerQualityEntity.getDate()));
         hfsfCompoundFertilizerQualityService.save(hfsfCompoundFertilizerQualityEntity);
 
         //化验数据登记
@@ -118,9 +116,16 @@ public class ChemicalExaminationController {
     public CommomResponse CompoundFertilizerQualityList(@RequestBody CompoundFertilizerQualityListDTO dto) {
         QueryWrapper<HFSFCompoundFertilizerQualityEntity> wrapper = new QueryWrapper<HFSFCompoundFertilizerQualityEntity>()
                 .between("date", dto.getStartDate(), dto.getEndDate())
+                .eq("del_flag", 0)
                 .orderBy(true, false, "date");
         IPage<HFSFCompoundFertilizerQualityEntity> page = hfsfCompoundFertilizerQualityService.page(new Page<HFSFCompoundFertilizerQualityEntity>(dto.getPageNum(), dto.getPageSize()), wrapper);
         return CommomResponse.data("success", page);
+    }
+
+    @PostMapping(value = "/HFSF" + "/CompoundFertilizerQuality" + "/delete", produces = "application/json;charset=UTF-8")
+    public CommomResponse CompoundFertilizerQualityDel(@RequestBody CompoundFertilizerQualityDelDTO dto) {
+        hfsfCompoundFertilizerQualityService.update(new UpdateWrapper<HFSFCompoundFertilizerQualityEntity>().set("del_flag", 1).eq("id", dto.getId()));
+        return CommomResponse.success("success");
     }
 
     /**

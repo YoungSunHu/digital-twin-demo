@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -34,6 +35,9 @@ public class FormulaEntity {
 
     @TableField("formula_code")
     private String formulaCode;
+
+    @TableField("formula_date")
+    private LocalDate formulaDate;
 
     @TableField("create_time")
     private LocalDateTime createTime;
