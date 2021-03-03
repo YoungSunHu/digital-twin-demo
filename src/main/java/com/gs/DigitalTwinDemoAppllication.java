@@ -15,7 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @SpringBootApplication
 @MapperScan("com.gs.dao")
-@EnableScheduling
+//@EnableScheduling
 @EnableSwagger2
 @EnableAsync
 public class DigitalTwinDemoAppllication {
