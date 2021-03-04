@@ -1,24 +1,26 @@
 package com.gs.controller;
 
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelReader;
-import com.alibaba.excel.read.metadata.ReadSheet;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.gs.DTO.*;
 import com.gs.VO.CommomResponse;
 import com.gs.dao.entity.SenderDataDetailEntity;
-import com.gs.easyexcel.MapListener;
+import com.gs.dao.entity.SenderDataEntity;
+import com.gs.dao.entity.SenderTaskEntity;
 import com.gs.exception.BussinessException;
 import com.gs.service.DataSenderService;
+import com.gs.service.SenderDataDetailService;
+import com.gs.service.SenderDataService;
+import com.gs.service.SenderTaskService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
 
 /**
  * @author ：YoungSun
@@ -34,30 +36,79 @@ public class DataSenderController {
     @Autowired
     DataSenderService dataSenderService;
 
-    @PostMapping(value = "dataUpload")
-    public CommomResponse dataUpload(@RequestParam(value = "file") MultipartFile file) {
+    @Autowired
+    SenderDataService senderDataService;
+
+    @Autowired
+    SenderDataDetailService senderDataDetailService;
+
+    @Autowired
+    SenderTaskService senderTaskService;
+
+    @PostMapping(value = "/dataUpload")
+    public CommomResponse dataUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] split = file.getOriginalFilename().split("\\.");
         if (!split[1].equals("xlsx")) {
             throw new BussinessException("导入文件错误!");
         }
-        try {
-            InputStream inputStream = file.getInputStream();
-            MapListener mapListener = new MapListener();
-            ExcelReader excelReader = EasyExcel.read(inputStream, mapListener).build();
-            //化验表1
-            ReadSheet readSheet1 = EasyExcel.readSheet(0).build();
-            excelReader.read(readSheet1);
-            //化验表2
-            ReadSheet readSheet2 = EasyExcel.readSheet(1).build();
-            excelReader.read(readSheet2);
-            //DCS数据
-            ReadSheet readSheet3 = EasyExcel.readSheet(3).build();
-            excelReader.read(readSheet3);
-            List<SenderDataDetailEntity> detailEntities = mapListener.getDetailEntities();
-            System.out.println(detailEntities);
-        } catch (IOException e) {
-            e.printStackTrace();
+        dataSenderService.DataInbound(file.getInputStream());
+        return CommomResponse.success("数据导入中");
+    }
+
+    @PostMapping(value = "/data/pageList")
+    public CommomResponse dataPageList(@RequestBody DataPageListDTO dto) {
+        QueryWrapper<SenderDataEntity> querywrap = new QueryWrapper<SenderDataEntity>().between("create_time", dto.getStartDate(), dto.getEndDate()).orderBy(true, false, "create_time");
+        IPage<SenderDataEntity> page = senderDataService.page(new Page<>(dto.getPageNum(), dto.getPageSize()), querywrap);
+        return CommomResponse.data("success", page);
+    }
+
+    @PostMapping(value = "/data/delete")
+    public CommomResponse dataDelete(@RequestBody @Validated DataDeleteDTO dto) {
+        int count = senderTaskService.count(new QueryWrapper<SenderTaskEntity>().eq("data_id", dto.getId()));
+        if (count > 0) {
+            throw new BussinessException("数据仍有绑定关联任务!");
         }
-        return null;
+        senderDataService.remove(new QueryWrapper<SenderDataEntity>().eq("id", dto.getId()));
+        senderDataDetailService.remove(new QueryWrapper<SenderDataDetailEntity>().eq("data_id", dto.getId()));
+        return CommomResponse.success("success");
+    }
+
+    @PostMapping(value = "/data/detail")
+    public CommomResponse dataDCS(@RequestBody @Validated DataDTO dto) {
+        IPage<SenderDataDetailEntity> page = senderDataDetailService.page(new Page<>(dto.getPageNum(), dto.getPageSize()), new QueryWrapper<SenderDataDetailEntity>().eq("data_type", dto.getDataType()).eq("data_id", dto.getId()).orderBy(true, true, "opc_item_timestamp"));
+        return CommomResponse.data("success", page);
+    }
+
+
+    @PostMapping(value = "/task/save")
+    public CommomResponse taskSave(@RequestBody @Validated TaskSaveDTO dto) {
+        SenderTaskEntity senderTaskEntity = new SenderTaskEntity();
+        BeanUtils.copyProperties(dto, senderTaskEntity);
+        senderTaskService.save(senderTaskEntity);
+        return CommomResponse.success("success");
+    }
+
+    @PostMapping(value = "/task/pageList")
+    public CommomResponse taskPageList(@RequestBody @Validated TaskPageListDTO dto) {
+        QueryWrapper<SenderTaskEntity> queryWrapper = new QueryWrapper<SenderTaskEntity>().between("create_time", dto.getStartDate(), dto.getEndDate()).orderByDesc("create_time");
+        IPage<SenderTaskEntity> page = senderTaskService.page(new Page<>(dto.getPageNum(), dto.getPageSize()), queryWrapper);
+        return CommomResponse.data("success", page);
+    }
+
+    @PostMapping(value = "/task/update")
+    public CommomResponse taskUpdate(@RequestBody @Validated TaskUpdateDTO dto) {
+        QueryWrapper<SenderTaskEntity> queryWrapper = new QueryWrapper<SenderTaskEntity>().eq("id", dto.getId());
+        SenderTaskEntity one = senderTaskService.getOne(queryWrapper);
+        SenderTaskEntity senderTaskEntity = new SenderTaskEntity();
+        BeanUtils.copyProperties(dto, senderTaskEntity);
+        senderTaskEntity.setId(one.getId());
+        senderTaskService.updateById(senderTaskEntity);
+        return CommomResponse.success("success");
+    }
+
+    @PostMapping(value = "/task/delete")
+    public CommomResponse taskDelete(@RequestBody @Validated TaskDeleteDTO dto) {
+        senderTaskService.remove(new QueryWrapper<SenderTaskEntity>().eq("id", dto.getId()));
+        return CommomResponse.success("success");
     }
 }

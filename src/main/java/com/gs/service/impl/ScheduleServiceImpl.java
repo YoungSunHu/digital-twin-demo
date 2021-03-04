@@ -85,4 +85,11 @@ public class ScheduleServiceImpl implements ScheduleService {
                 }
         );
     }
+
+    @Override
+    @Scheduled(cron = "*/1 * * * * ?")
+    @Async
+    public void dataSend() {
+
+    }
 }

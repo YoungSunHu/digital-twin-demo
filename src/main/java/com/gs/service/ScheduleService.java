@@ -18,4 +18,9 @@ public interface ScheduleService {
      * 原始点位均值统计
      */
     void itemAverage();
+
+    /**
+     * 模拟数据发送
+     */
+    void dataSend();
 }

@@ -37,6 +37,9 @@ public class SenderDataDetailEntity {
     @TableField("opc_item_timestamp")
     private LocalDateTime opcItemTimestamp;
 
+    @TableField("data_type")
+    private Integer dataType;
+
     @TableField("create_time")
     private LocalDateTime createTime;
 

@@ -41,5 +41,21 @@ public class DataController {
         return CommomResponse.success("success");
     }
 
+    /**
+     * 发送器数据接收接口
+     *
+     * @param entity
+     * @return
+     */
+    @PostMapping("/senderDataRecevice")
+    public CommomResponse senderDataRecevice(@RequestBody OPCItemValueRecordEntity entity) {
+        log.info("接收OPCItem数据:{}", entity.toString());
+        entity.setId(null);
+        opcItemValueRecordMapper.insert(entity);
+        opcItemValueRecordService.itemCache(entity);
+        twinPointValueRecordService.updateDCSTwinPoint(entity);
+        return CommomResponse.success("success");
+    }
+
 
 }

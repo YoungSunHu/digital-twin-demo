@@ -29,11 +29,9 @@ public class MapListener extends AnalysisEventListener<Map<Integer, String>> {
 
     private SenderDataEntity senderDataEntity = new SenderDataEntity();
 
-    private static Pattern pattern = Pattern.compile("\\d+\\.\\d+$|-\\d+\\.\\d+$");
+    private static Pattern pattern = Pattern.compile("(^[\\-0-9][0-9]*(.[0-9]+)?)$");
 
     private static Long count = 0L;
-
-    private static Snowflake snowflake = new Snowflake(1, 1);
 
     private Map<Integer, CellData> nameMap = null;
 
@@ -41,16 +39,17 @@ public class MapListener extends AnalysisEventListener<Map<Integer, String>> {
 
     private Map<String, String> pointInfo = new HashMap<>();
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d H:mm");
 
     @Override
     public void invoke(Map map, AnalysisContext context) {
         if (count == 0) {
-            senderDataEntity.setId(snowflake.nextId());
             IDMap = map;
             IDMap.forEach(
                     (k, v) -> {
-                        pointInfo.put((String) v, nameMap.get((Integer) k).getStringValue());
+                        if ((Integer) k > 0) {
+                            pointInfo.put((String) v, nameMap.get((Integer) k).getStringValue());
+                        }
                     }
             );
             senderDataEntity.setPointInfo(pointInfo.toString());
@@ -91,5 +90,17 @@ public class MapListener extends AnalysisEventListener<Map<Integer, String>> {
 
     public static boolean isNumeric(String str) {
         return pattern.matcher(str).matches();
+    }
+
+    public SenderDataEntity getSenderDataEntity() {
+        return senderDataEntity;
+    }
+
+    public void defaultSet() {
+        count = 0L;
+        detailEntities.clear();
+        pointInfo = new HashMap<>();
+        IDMap = null;
+        nameMap = null;
     }
 }
