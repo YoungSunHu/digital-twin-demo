@@ -28,7 +28,6 @@ public class TaskUpdateDTO {
     /**
      * 关联数据ID
      */
-    @NotNull(message = "dataId不得为空")
     private Long dataId;
 
     /**
@@ -39,13 +38,11 @@ public class TaskUpdateDTO {
     /**
      * 工厂编号
      */
-    @NotNull(message = "factoryId不得为空")
     private String factoryId;
 
     /**
      * 发送模式 0:循环发送 1:一次发送
      */
-    @NotNull(message = "sendMode不得为空")
     private Integer sendMode;
 
     /**
