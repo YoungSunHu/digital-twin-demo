@@ -41,6 +41,9 @@ public class ChemicalExaminationRecordEntity {
     @TableField("exam_item_value")
     private String examItemValue;
 
+    @TableField("data_source")
+    private Integer dataSource;
+
     @TableField("exam_time")
     private LocalDateTime examTime;
 

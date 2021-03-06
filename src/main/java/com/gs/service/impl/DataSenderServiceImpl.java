@@ -189,8 +189,16 @@ public class DataSenderServiceImpl implements DataSenderService {
             } else if (task.getSendMode() == 1 || task.getSendMode() == 2) {
                 //一次发送或原始时间点发送
                 IPage<SenderDataDetailEntity> page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().select("distinct opc_item_timestamp").eq("data_type", 1).in("opc_item_id", map1.keySet()).gt("opc_item_timestamp", task.getDataPointerTime()).orderByAsc("opc_item_timestamp"));
-                task.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
-                task.setNextSendTime(LocalDateTime.now().plus(task.getSendCycle(), ChronoUnit.SECONDS));
+                if (CollectionUtils.isEmpty(page.getRecords())) {
+                    //为空判定已发送完成,任务更新已过期
+                    task.setTaskStatus(2);
+                    //数据指针时间初始化
+                    page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().select("distinct opc_item_timestamp").eq("data_type", 1).in("opc_item_id", map1.keySet()).gt("opc_item_timestamp", task.getDataPointerTime()).orderByAsc("opc_item_timestamp"));
+                    task.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
+                } else {
+                    task.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
+                    task.setNextSendTime(LocalDateTime.now().plus(task.getSendCycle(), ChronoUnit.SECONDS));
+                }
                 senderTaskService.updateById(task);
             }
 

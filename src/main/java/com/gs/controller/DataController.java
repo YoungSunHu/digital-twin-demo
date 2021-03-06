@@ -76,14 +76,19 @@ public class DataController {
         if (count == 0) {
             throw new BussinessException("点位不存在");
         }
+
+
         //插入opc点位数据
+        //opcitem点位重复判断
         OPCItemValueRecordEntity opcItemValueRecordEntity = new OPCItemValueRecordEntity();
         opcItemValueRecordEntity.setItemTimestamp(Date.from(dto.getOpcItemTimestamp().atZone(ZoneOffset.ofHours(8)).toInstant()));
         opcItemValueRecordEntity.setItemValue(dto.getOpcItemValue());
         opcItemValueRecordEntity.setItemType(dto.getOpcItemType());
         opcItemValueRecordEntity.setFactoryId(dto.getFactoryId());
         opcItemValueRecordEntity.setIsSuccess(false);
-        opcItemValueRecordService.save(opcItemValueRecordEntity);
+        //数据源 1:工控机 2:数据发送器
+        opcItemValueRecordEntity.setDataSource(2);
+        //opcItemValueRecordService.saveOrUpdate(opcItemValueRecordEntity,new QueryWrapper<OPCItemValueRecordEntity>().eq("item_id",opcItemValueRecordEntity.getItemId()).eq("factory_id",opcItemValueRecordEntity.getFactoryId()).eq("item_timestamp",opcItemValueRecordEntity.getItemTimestamp()));
         //化验数据核对
         if (dto.getDataChemicalDTOs() != null) {
             for (SenderDataChemicalDTO dataChemicalDTO : dto.getDataChemicalDTOs()) {
@@ -92,7 +97,9 @@ public class DataController {
                     ChemicalExaminationRecordEntity chemicalExaminationRecordEntity = new ChemicalExaminationRecordEntity();
                     BeanUtils.copyProperties(one, chemicalExaminationRecordEntity);
                     chemicalExaminationRecordEntity.setExamItemValue(dataChemicalDTO.getExamItemValue());
-                    chemicalExaminationRecordService.save(chemicalExaminationRecordEntity);
+                    //数据源 1:前端登记 2:发送器上传
+                    chemicalExaminationRecordEntity.setDataSource(2);
+                    //chemicalExaminationRecordService.save(chemicalExaminationRecordEntity);
                 }
             }
         }

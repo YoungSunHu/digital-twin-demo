@@ -40,6 +40,9 @@ public class OPCItemValueRecordEntity {
     @TableField("factory_id")
     private String factoryId;
 
+    @TableField("data_source")
+    private Integer dataSource;
+
     @TableField("create_time")
     private Date createTime;
 
