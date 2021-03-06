@@ -44,3 +44,7 @@ logging:
     com.gs.*: debug
 server:
   port: 8765
+
+sender:
+  #数据接收地址
+  uploadurl: http://127.0.0.1:8765/data/senderDataRecevice

@@ -7,6 +7,7 @@ import com.gs.dao.entity.TwinPointEntity;
 import com.gs.dao.entity.TwinPointValueRecordEntity;
 import com.gs.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,8 +40,10 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Autowired
     DataSenderService dataSenderService;
 
+
+
     @Override
-    @Scheduled(cron = "*/1 * * * * ?")
+    //@Scheduled(cron = "*/1 * * * * ?")
     @Async
     public void twinPointUpdate() {
         //需要更新的点位 一次处理20个
@@ -66,7 +69,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    @Scheduled(cron = "*/1 * * * * ?")
+    //@Scheduled(cron = "*/1 * * * * ?")
     @Async
     public void twinPointAverage() {
         //需要更新均值的孪生点位
@@ -80,7 +83,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    @Scheduled(cron = "*/1 * * * * ?")
+    //@Scheduled(cron = "*/1 * * * * ?")
     @Async
     public void itemAverage() {
         //需要统计均值的item
@@ -93,7 +96,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    //@Scheduled(cron = "*/1 * * * * ?")
+    @Scheduled(cron = "*/1 * * * * ?")
     @Async
     public void dataSend() {
         //发送任务

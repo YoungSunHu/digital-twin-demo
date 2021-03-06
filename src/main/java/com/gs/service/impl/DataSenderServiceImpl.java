@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gs.DTO.SenderDataChemicalDTO;
 import com.gs.DTO.SenderDataReceviceDTO;
+import com.gs.VO.CommomResponse;
 import com.gs.controller.DataController;
 import com.gs.dao.entity.SenderDataDetailEntity;
 import com.gs.dao.entity.SenderDataEntity;
@@ -20,8 +21,11 @@ import com.gs.service.DataSenderService;
 import com.gs.service.SenderDataDetailService;
 import com.gs.service.SenderDataService;
 import com.gs.service.SenderTaskService;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,12 +34,14 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ：YoungSun
  * @date ：Created in 2021/3/3 13:52
  * @modified By：
  */
+@Slf4j
 @Service
 public class DataSenderServiceImpl implements DataSenderService {
 
@@ -52,10 +58,19 @@ public class DataSenderServiceImpl implements DataSenderService {
     @Autowired
     SenderTaskService senderTaskService;
 
+    @Value("${sender.uploadurl}")
+    String uploadurl;
+
+    OkHttpClient okHttpClient = new OkHttpClient.Builder()
+            .connectTimeout(2, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .build();
+
     @Async
     @Override
     public void DataInbound(MultipartFile file) {
         ExcelReader excelReader = null;
+
         try {
             MapListener mapListener = new MapListener();
             mapListener.defaultSet();
@@ -89,6 +104,10 @@ public class DataSenderServiceImpl implements DataSenderService {
             );
             //保存化验数据
             senderDataDetailService.saveBatch(detailEntities2);
+            //保存数据记录
+            SenderDataEntity senderDataEntity = mapListener.getSenderDataEntity();
+            senderDataEntity.setChemicalInfo(senderDataEntity.getPointInfo());
+            mapListener.setPointInfo(new HashMap<>());
             mapListener.defaultSet();
 
 
@@ -105,8 +124,7 @@ public class DataSenderServiceImpl implements DataSenderService {
             senderDataDetailService.saveBatch(detailEntities3);
             mapListener.defaultSet();
 
-            //保存数据记录
-            SenderDataEntity senderDataEntity = mapListener.getSenderDataEntity();
+
             senderDataEntity.setDataName(file.getOriginalFilename().split("\\.")[0]);
             senderDataService.save(senderDataEntity);
 
@@ -148,7 +166,7 @@ public class DataSenderServiceImpl implements DataSenderService {
 
                 //化验数据处理
                 if (StringUtils.isNotBlank(task.getProductionLineCode())) {
-                    Map<String, String> map = JSON.parseObject(data.getPointInfo(), Map.class);
+                    Map<String, String> map = JSON.parseObject(data.getChemicalInfo(), Map.class);
                     Set<String> items = map.keySet();
                     List<SenderDataChemicalDTO> chemicalDTOS = new ArrayList<>();
                     for (String item : items) {
@@ -158,7 +176,7 @@ public class DataSenderServiceImpl implements DataSenderService {
                         }
                         SenderDataChemicalDTO senderDataChemicalDTO = new SenderDataChemicalDTO();
                         senderDataChemicalDTO.setProductionLineCode(task.getProductionLineCode());
-                        senderDataChemicalDTO.setExamCode(task.getProductionLineCode());
+                        senderDataChemicalDTO.setExamCode(item);
                         senderDataChemicalDTO.setExamItemValue(page.getRecords().get(0).getOpcItemValue());
                         //发送时间 0:循环模式 1:一次发送 2:原始时间点发送
                         if (task.getSendMode() == 0 || task.getSendMode() == 1) {
@@ -172,38 +190,64 @@ public class DataSenderServiceImpl implements DataSenderService {
                 }
 
                 //向数据中台发送数据(保留接口,这里直接调用)
-                //dataController.senderDataRecevice(senderDataReceviceDTO);
+                try {
+                    boolean isSuccess = this.send(senderDataReceviceDTO);
+                    if (isSuccess) {
+                        //调整data_detail指针
+                        //发送时间 0:循环模式 1:一次发送 2:原始时间点发送
+                        if (task.getSendMode() == 0) {
+                            //循环模式如果没有下一个,则就指向第一个
+                            IPage<SenderDataDetailEntity> page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().select("distinct opc_item_timestamp").eq("data_type", 1).in("opc_item_id", map1.keySet()).gt("opc_item_timestamp", task.getDataPointerTime()).orderByAsc("opc_item_timestamp"));
+                            if (CollectionUtils.isEmpty(page.getRecords())) {
+                                page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().eq("data_type", 1).in("opc_item_id", map1.keySet()).orderByAsc("opc_item_timestamp"));
+                            }
+                            task.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
+                            task.setNextSendTime(LocalDateTime.now().plus(task.getSendCycle(), ChronoUnit.SECONDS));
+                            senderTaskService.updateById(task);
+                        } else if (task.getSendMode() == 1 || task.getSendMode() == 2) {
+                            //一次发送或原始时间点发送
+                            IPage<SenderDataDetailEntity> page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().select("distinct opc_item_timestamp").eq("data_type", 1).in("opc_item_id", map1.keySet()).gt("opc_item_timestamp", task.getDataPointerTime()).orderByAsc("opc_item_timestamp"));
+                            if (CollectionUtils.isEmpty(page.getRecords())) {
+                                //为空判定已发送完成,任务更新已过期
+                                task.setTaskStatus(2);
+                                //数据指针时间初始化
+                                page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().select("distinct opc_item_timestamp").eq("data_type", 1).in("opc_item_id", map1.keySet()).gt("opc_item_timestamp", task.getDataPointerTime()).orderByAsc("opc_item_timestamp"));
+                                task.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
+                            } else {
+                                task.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
+                                task.setNextSendTime(LocalDateTime.now().plus(task.getSendCycle(), ChronoUnit.SECONDS));
+                            }
+                            senderTaskService.updateById(task);
+                        }
+                    } else {
+                        task.setNextSendTime(LocalDateTime.now().plus(task.getSendCycle(), ChronoUnit.SECONDS));
+                        senderTaskService.updateById(task);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    task.setNextSendTime(LocalDateTime.now().plus(task.getSendCycle(), ChronoUnit.SECONDS));
+                    senderTaskService.updateById(task);
+                }
             }
 
-            //调整data_detail指针
-            //发送时间 0:循环模式 1:一次发送 2:原始时间点发送
-            if (task.getSendMode() == 0) {
-                //循环模式如果没有下一个,则就指向第一个
-                IPage<SenderDataDetailEntity> page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().select("distinct opc_item_timestamp").eq("data_type", 1).in("opc_item_id", map1.keySet()).gt("opc_item_timestamp", task.getDataPointerTime()).orderByAsc("opc_item_timestamp"));
-                if (CollectionUtils.isEmpty(page.getRecords())) {
-                    page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().eq("data_type", 1).in("opc_item_id", map1.keySet()).orderByAsc("opc_item_timestamp"));
-                }
-                task.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
-                task.setNextSendTime(LocalDateTime.now().plus(task.getSendCycle(), ChronoUnit.SECONDS));
-                senderTaskService.updateById(task);
-            } else if (task.getSendMode() == 1 || task.getSendMode() == 2) {
-                //一次发送或原始时间点发送
-                IPage<SenderDataDetailEntity> page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().select("distinct opc_item_timestamp").eq("data_type", 1).in("opc_item_id", map1.keySet()).gt("opc_item_timestamp", task.getDataPointerTime()).orderByAsc("opc_item_timestamp"));
-                if (CollectionUtils.isEmpty(page.getRecords())) {
-                    //为空判定已发送完成,任务更新已过期
-                    task.setTaskStatus(2);
-                    //数据指针时间初始化
-                    page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().select("distinct opc_item_timestamp").eq("data_type", 1).in("opc_item_id", map1.keySet()).gt("opc_item_timestamp", task.getDataPointerTime()).orderByAsc("opc_item_timestamp"));
-                    task.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
-                } else {
-                    task.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
-                    task.setNextSendTime(LocalDateTime.now().plus(task.getSendCycle(), ChronoUnit.SECONDS));
-                }
-                senderTaskService.updateById(task);
-            }
 
         }
     }
 
+    public synchronized boolean send(SenderDataReceviceDTO senderDataReceviceDTO) throws IOException {
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), JSON.toJSONString(senderDataReceviceDTO));
+        Request request = new Request.Builder().url(uploadurl).post(requestBody).build();
+        Response response = okHttpClient.newCall(request).execute();
+        if (response.isSuccessful()) {
+            String responseBody = response.body().string();
+            CommomResponse commomResponse = JSON.parseObject(responseBody, CommomResponse.class);
+            if (commomResponse.getCode().equals(0)) {
+                return true;
+            } else {
+                log.error("数据:{}上传失败,返回:{}", senderDataReceviceDTO.toString(), commomResponse.getMsg());
+            }
+        }
+        return false;
+    }
 
 }

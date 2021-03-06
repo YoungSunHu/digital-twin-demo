@@ -22,6 +22,9 @@ public class SenderDataEntity {
     @TableField("point_info")
     private String pointInfo;
 
+    @TableField("chemical_info")
+    private String chemicalInfo;
+
     @TableField("data_name")
     private String dataName;
 
