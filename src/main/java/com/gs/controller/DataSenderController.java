@@ -2,6 +2,7 @@ package com.gs.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gs.DTO.*;
 import com.gs.VO.CommomResponse;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 /**
  * @author ：YoungSun
@@ -51,7 +55,7 @@ public class DataSenderController {
         if (!split[1].equals("xlsx")) {
             throw new BussinessException("导入文件错误!");
         }
-        dataSenderService.DataInbound(file.getInputStream());
+        dataSenderService.DataInbound(file);
         return CommomResponse.success("数据导入中");
     }
 
@@ -60,6 +64,12 @@ public class DataSenderController {
         QueryWrapper<SenderDataEntity> querywrap = new QueryWrapper<SenderDataEntity>().between("create_time", dto.getStartDate(), dto.getEndDate()).orderBy(true, false, "create_time");
         IPage<SenderDataEntity> page = senderDataService.page(new Page<>(dto.getPageNum(), dto.getPageSize()), querywrap);
         return CommomResponse.data("success", page);
+    }
+
+    @GetMapping(value = "/data/list")
+    public CommomResponse dataList() {
+        List<SenderDataEntity> list = senderDataService.list(null);
+        return CommomResponse.data("success", list);
     }
 
     @PostMapping(value = "/data/delete")
@@ -84,6 +94,18 @@ public class DataSenderController {
     public CommomResponse taskSave(@RequestBody @Validated TaskSaveDTO dto) {
         SenderTaskEntity senderTaskEntity = new SenderTaskEntity();
         BeanUtils.copyProperties(dto, senderTaskEntity);
+        //下次发送时间
+        senderTaskEntity.setNextSendTime(LocalDateTime.now().plus(senderTaskEntity.getSendCycle(), ChronoUnit.SECONDS));
+        //设置初始data_detail数据指针
+        IPage<SenderDataDetailEntity> page = senderDataDetailService.page(new Page<>(1, 1), new QueryWrapper<SenderDataDetailEntity>().eq("data_id", senderTaskEntity.getDataId()).orderByAsc("opc_item_timestamp"));
+        if (CollectionUtils.isEmpty(page.getRecords())) {
+            throw new BussinessException("无指定初始化发送数据,请检查数据!");
+        } else {
+            senderTaskEntity.setDataPointerTime(page.getRecords().get(0).getOpcItemTimestamp());
+        }
+        //数据名称设置
+        SenderDataEntity senderDataEntity = senderDataService.getOne(new QueryWrapper<SenderDataEntity>().eq("id", dto.getDataId()));
+        senderTaskEntity.setDataName(senderDataEntity.getDataName());
         senderTaskService.save(senderTaskEntity);
         return CommomResponse.success("success");
     }

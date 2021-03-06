@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Snowflake;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.metadata.CellData;
+import com.alibaba.fastjson.JSON;
 import com.gs.dao.entity.SenderDataDetailEntity;
 import com.gs.dao.entity.SenderDataEntity;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +53,7 @@ public class MapListener extends AnalysisEventListener<Map<Integer, String>> {
                         }
                     }
             );
-            senderDataEntity.setPointInfo(pointInfo.toString());
+            senderDataEntity.setPointInfo(JSON.toJSONString(pointInfo));
         } else if (count > 0) {
             String opcTimestamp = (String) map.get(0);
             map.forEach(
@@ -99,8 +100,16 @@ public class MapListener extends AnalysisEventListener<Map<Integer, String>> {
     public void defaultSet() {
         count = 0L;
         detailEntities.clear();
-        pointInfo = new HashMap<>();
+        //pointInfo = new HashMap<>();
         IDMap = null;
         nameMap = null;
+    }
+
+    public Map<String, String> getPointInfo() {
+        return pointInfo;
+    }
+
+    public void setPointInfo(Map<String, String> pointInfo) {
+        this.pointInfo = pointInfo;
     }
 }

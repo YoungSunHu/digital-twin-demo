@@ -41,6 +41,11 @@ public class TaskUpdateDTO {
     private String factoryId;
 
     /**
+     * 生产线编号
+     */
+    private String productionLineCode;
+
+    /**
      * 发送模式 0:循环发送 1:一次发送
      */
     private Integer sendMode;

@@ -2,7 +2,6 @@ package com.gs.dao.entity;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -30,17 +29,26 @@ public class SenderTaskEntity {
     @TableField("data_id")
     private Long dataId;
 
-    @TableField("data_pointer_id")
-    private Long dataPointerId;
+    @TableField("data_name")
+    private String dataName;
+
+    @TableField("data_pointer_time")
+    private LocalDateTime dataPointerTime;
 
     @TableField("factory_id")
     private String factoryId;
+
+    @TableField("production_line_code")
+    private String productionLineCode;
 
     @TableField("send_mode")
     private Integer sendMode;
 
     @TableField("send_cycle")
     private Integer sendCycle;
+
+    @TableField("next_send_time")
+    private LocalDateTime nextSendTime;
 
     @TableField("create_time")
     private LocalDateTime createTime;

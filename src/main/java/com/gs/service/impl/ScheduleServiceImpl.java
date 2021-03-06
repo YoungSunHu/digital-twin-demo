@@ -2,6 +2,7 @@ package com.gs.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.gs.dao.entity.OPCItemEntity;
+import com.gs.dao.entity.SenderTaskEntity;
 import com.gs.dao.entity.TwinPointEntity;
 import com.gs.dao.entity.TwinPointValueRecordEntity;
 import com.gs.service.*;
@@ -32,6 +33,11 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Autowired
     TwinPointAvgService twinPointAvgService;
 
+    @Autowired
+    SenderTaskService senderTaskService;
+
+    @Autowired
+    DataSenderService dataSenderService;
 
     @Override
     @Scheduled(cron = "*/1 * * * * ?")
@@ -87,9 +93,11 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    @Scheduled(cron = "*/1 * * * * ?")
+    //@Scheduled(cron = "*/1 * * * * ?")
     @Async
     public void dataSend() {
-
+        //发送任务
+        List<SenderTaskEntity> tasks = senderTaskService.list(new QueryWrapper<SenderTaskEntity>().lt("next_send_time", LocalDateTime.now()).eq("task_status", 0));
+        dataSenderService.DataSend(tasks);
     }
 }

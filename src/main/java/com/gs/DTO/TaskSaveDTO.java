@@ -41,13 +41,18 @@ public class TaskSaveDTO {
     private String factoryId;
 
     /**
+     * 生产线编号
+     */
+    private String productionLineCode;
+
+    /**
      * 发送模式 0:循环发送 1:一次发送
      */
     @NotNull(message = "sendMode不得为空")
     private Integer sendMode;
 
     /**
-     * 循环周期
+     * 发送周期
      */
     private Integer sendCycle = 60;
 }

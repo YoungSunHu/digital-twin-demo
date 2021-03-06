@@ -60,6 +60,47 @@ public class ChemicalExaminationController {
     }
 
     /**
+     * 新增化验项
+     *
+     * @param dto
+     * @return
+     */
+    @PostMapping(value = "/itemSave", produces = "application/json;charset=UTF-8")
+    public CommomResponse chemicalExaminationItemSave(@RequestBody ChemicalExaminationItemSaveDTO dto) {
+        ChemicalExaminationEntity entity = new ChemicalExaminationEntity();
+        BeanUtils.copyProperties(dto, entity);
+        chemicalExaminationService.save(entity);
+        return CommomResponse.success("success");
+    }
+
+    /**
+     * 删除化验项
+     *
+     * @param dto
+     * @return
+     */
+    @PostMapping(value = "/itemDel", produces = "application/json;charset=UTF-8")
+    public CommomResponse chemicalExaminationItemDel(@RequestBody ChemicalExaminationItemDelDTO dto) {
+        chemicalExaminationService.remove(new QueryWrapper<ChemicalExaminationEntity>().eq("id", dto.getId()));
+        return CommomResponse.success("success");
+    }
+
+    /**
+     * 化验项更新
+     *
+     * @param dto
+     * @return
+     */
+    @PostMapping(value = "/itemUpdate", produces = "application/json;charset=UTF-8")
+    public CommomResponse chemicalExaminationItemUpdate(@RequestBody ChemicalExaminationItemUpdateDTO dto) {
+        ChemicalExaminationEntity entity = new ChemicalExaminationEntity();
+        BeanUtils.copyProperties(dto, entity);
+        chemicalExaminationService.updateById(entity);
+        return CommomResponse.success("success");
+    }
+
+
+    /**
      * 四方集团复合肥产品质量统计报表登记接口
      *
      * @param dto
